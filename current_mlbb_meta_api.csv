@@ -1,0 +1,132 @@
+Hero,Meta Tier,Contest Rate (%),Ban Rate,Pick Rate,Win Rate,True Match Presence (%)
+Gloo,S-Tier (Absolute Meta / Must Ban),93.42999999999999,92.83,0.6,54.55,6.0
+Sora,S-Tier (Absolute Meta / Must Ban),87.41000000000001,86.43,0.98,50.63,9.8
+Freya,S-Tier (Absolute Meta / Must Ban),82.07,80.97,1.1,53.74,11.0
+Guinevere,S-Tier (Absolute Meta / Must Ban),50.519999999999996,48.87,1.65,51.64,16.5
+Helcurt,S-Tier (Absolute Meta / Must Ban),49.849999999999994,49.12,0.73,50.59,7.3
+Fredrinn,S-Tier (Absolute Meta / Must Ban),43.849999999999994,42.69,1.16,52.83,11.6
+Alice,A-Tier (Comfort Staple),40.82,39.68,1.14,50.75,11.399999999999999
+Yi Sun-shin,A-Tier (Comfort Staple),40.269999999999996,38.08,2.19,51.12,21.9
+Aamon,A-Tier (Comfort Staple),29.93,29.11,0.82,52.0,8.2
+Hilda,A-Tier (Comfort Staple),27.3,26.19,1.11,53.06,11.100000000000001
+Diggie,A-Tier (Comfort Staple),23.4,23.07,0.33,55.76,3.3000000000000003
+Floryn,A-Tier (Comfort Staple),22.669999999999998,21.52,1.15,54.63,11.5
+Leomord,A-Tier (Comfort Staple),21.419999999999998,20.24,1.18,52.56,11.799999999999999
+Grock,A-Tier (Comfort Staple),19.73,18.51,1.22,49.51,12.2
+Gusion,A-Tier (Comfort Staple),19.43,17.21,2.22,50.58,22.200000000000003
+Zhuxin,A-Tier (Comfort Staple),18.58,17.63,0.95,52.88,9.5
+Angela,A-Tier (Comfort Staple),17.11,15.35,1.76,49.54,17.6
+Karrie,A-Tier (Comfort Staple),16.63,14.9,1.73,52.8,17.3
+Hanzo,A-Tier (Comfort Staple),16.34,15.75,0.59,50.54,5.8999999999999995
+Minsitthar,A-Tier (Comfort Staple),15.58,14.55,1.03,52.38,10.3
+Ixia,B-Tier (Reliable / Strong),14.559999999999999,13.19,1.37,52.83,13.700000000000001
+Zetian,A-Tier (Comfort Staple),13.73,11.69,2.04,52.06,20.4
+Franco,Solo-Queue Trap (Avoid at all costs),12.120000000000001,10.46,1.66,46.25,16.599999999999998
+Kadita,B-Tier (Reliable / Strong),11.510000000000002,10.22,1.29,53.38,12.9
+Estes,B-Tier (Reliable / Strong),10.82,10.28,0.54,53.82,5.4
+Yu Zhong,B-Tier (Reliable / Strong),10.16,8.7,1.46,50.48,14.6
+Hayabusa,C-Tier (Situational / Average),10.0,8.74,1.26,49.17,12.6
+Sun,B-Tier (Reliable / Strong),9.54,8.18,1.36,52.48,13.600000000000001
+Saber,B-Tier (Reliable / Strong),8.67,8.12,0.55,50.98,5.5
+Tigreal,Solo-Queue Trap (Avoid at all costs),7.37,5.45,1.92,46.78,19.2
+Minotaur,B-Tier (Reliable / Strong),7.13,6.41,0.72,53.07,7.199999999999999
+Lesley,C-Tier (Situational / Average),6.65,4.92,1.73,48.62,17.3
+Lancelot,D-Tier (Out of Meta / Weak),6.17,4.8,1.37,42.56,13.700000000000001
+Fanny,D-Tier (Out of Meta / Weak),6.14,5.35,0.79,43.31,7.9
+X.Borg,C-Tier (Situational / Average),5.8,4.95,0.85,49.22,8.5
+Granger,Solo-Queue Trap (Avoid at all costs),5.109999999999999,2.96,2.15,42.74,21.5
+Kaja,Hidden OP (The Specialist),4.5200000000000005,4.03,0.49,55.2,4.9
+Claude,C-Tier (Situational / Average),4.28,2.47,1.81,49.35,18.1
+Hanabi,A-Tier (Comfort Staple),4.09,2.28,1.81,53.21,18.1
+Badang,B-Tier (Reliable / Strong),3.73,2.56,1.17,50.47,11.7
+Belerick,C-Tier (Situational / Average),3.42,2.58,0.84,49.1,8.4
+Chou,D-Tier (Out of Meta / Weak),3.3899999999999997,2.01,1.38,44.65,13.799999999999999
+Lapu-Lapu,C-Tier (Situational / Average),3.2800000000000002,2.17,1.11,48.64,11.100000000000001
+Kalea,D-Tier (Out of Meta / Weak),2.73,2.37,0.36,45.92,3.5999999999999996
+Miya,B-Tier (Reliable / Strong),2.66,1.3,1.36,52.2,13.600000000000001
+Thamuz,B-Tier (Reliable / Strong),2.58,1.76,0.82,50.6,8.2
+Akai,B-Tier (Reliable / Strong),2.49,1.82,0.67,50.91,6.7
+Obsidia,B-Tier (Reliable / Strong),2.37,1.64,0.73,51.2,7.3
+Suyou,B-Tier (Reliable / Strong),2.3200000000000003,1.31,1.01,51.22,10.1
+Esmeralda,D-Tier (Out of Meta / Weak),2.3,1.41,0.89,44.92,8.9
+Benedetta,B-Tier (Reliable / Strong),2.2800000000000002,1.5,0.78,52.53,7.800000000000001
+Lukas,C-Tier (Situational / Average),2.1,1.52,0.58,49.16,5.8
+Vexana,B-Tier (Reliable / Strong),2.08,0.59,1.49,50.25,14.9
+Eudora,C-Tier (Situational / Average),2.0300000000000002,1.47,0.56,48.69,5.6000000000000005
+Joy,B-Tier (Reliable / Strong),1.95,1.44,0.51,50.16,5.1
+Clint,B-Tier (Reliable / Strong),1.9100000000000001,0.8,1.11,51.44,11.100000000000001
+Arlott,C-Tier (Situational / Average),1.88,1.19,0.69,49.61,6.8999999999999995
+Natalia,B-Tier (Reliable / Strong),1.87,1.61,0.26,51.77,2.6
+Cyclops,B-Tier (Reliable / Strong),1.8399999999999999,0.7,1.14,51.05,11.399999999999999
+Julian,B-Tier (Reliable / Strong),1.7000000000000002,0.91,0.79,50.08,7.9
+Johnson,C-Tier (Situational / Average),1.69,1.08,0.61,48.82,6.1
+Cici,C-Tier (Situational / Average),1.65,0.98,0.67,48.01,6.7
+Atlas,B-Tier (Reliable / Strong),1.54,0.96,0.58,50.17,5.8
+Kimmy,C-Tier (Situational / Average),1.52,0.52,1.0,48.24,10.0
+Ruby,B-Tier (Reliable / Strong),1.51,0.65,0.86,52.31,8.6
+Kagura,B-Tier (Reliable / Strong),1.51,0.67,0.84,50.11,8.4
+Rafaela,B-Tier (Reliable / Strong),1.49,1.23,0.26,52.42,2.6
+Valir,B-Tier (Reliable / Strong),1.48,0.73,0.75,51.01,7.5
+Phoveus,C-Tier (Situational / Average),1.44,0.88,0.56,49.98,5.6000000000000005
+Carmilla,B-Tier (Reliable / Strong),1.41,0.72,0.69,50.81,6.8999999999999995
+Pharsa,C-Tier (Situational / Average),1.4000000000000001,0.31,1.09,49.48,10.9
+Silvanna,B-Tier (Reliable / Strong),1.3900000000000001,0.66,0.73,52.21,7.3
+Khufra,B-Tier (Reliable / Strong),1.35,0.96,0.39,52.42,3.9000000000000004
+Uranus,B-Tier (Reliable / Strong),1.2999999999999998,0.69,0.61,51.71,6.1
+Nana,D-Tier (Out of Meta / Weak),1.29,0.59,0.7,45.79,7.0
+Cecilion,B-Tier (Reliable / Strong),1.23,0.2,1.03,50.06,10.3
+Masha,Hidden OP (The Specialist),1.1600000000000001,0.91,0.25,56.4,2.5
+Alucard,B-Tier (Reliable / Strong),1.13,0.57,0.56,50.6,5.6000000000000005
+Harley,C-Tier (Situational / Average),1.1099999999999999,0.5,0.61,48.06,6.1
+Khaleed,B-Tier (Reliable / Strong),1.08,0.59,0.49,52.27,4.9
+Xavier,B-Tier (Reliable / Strong),1.08,0.17,0.91,50.03,9.1
+Odette,B-Tier (Reliable / Strong),1.05,0.28,0.77,51.71,7.7
+Karina,D-Tier (Out of Meta / Weak),1.03,0.54,0.49,45.36,4.9
+Brody,B-Tier (Reliable / Strong),0.97,0.29,0.68,51.45,6.800000000000001
+Lylia,C-Tier (Situational / Average),0.95,0.26,0.69,49.12,6.8999999999999995
+Lunox,C-Tier (Situational / Average),0.95,0.33,0.62,48.92,6.2
+Gatotkaca,D-Tier (Out of Meta / Weak),0.92,0.27,0.65,46.33,6.5
+Selena,D-Tier (Out of Meta / Weak),0.92,0.38,0.54,45.12,5.4
+Faramis,B-Tier (Reliable / Strong),0.9199999999999999,0.71,0.21,51.56,2.1
+Yin,C-Tier (Situational / Average),0.9,0.55,0.35,49.34,3.5
+Layla,D-Tier (Out of Meta / Weak),0.89,0.4,0.49,46.59,4.9
+Chang'e,C-Tier (Situational / Average),0.8700000000000001,0.2,0.67,48.48,6.7
+Natan,B-Tier (Reliable / Strong),0.87,0.26,0.61,52.87,6.1
+Paquito,D-Tier (Out of Meta / Weak),0.8400000000000001,0.3,0.54,47.49,5.4
+Alpha,D-Tier (Out of Meta / Weak),0.82,0.12,0.7,46.53,7.0
+Beatrix,C-Tier (Situational / Average),0.79,0.13,0.66,48.68,6.6000000000000005
+Valentina,D-Tier (Out of Meta / Weak),0.79,0.52,0.27,42.98,2.7
+Irithel,B-Tier (Reliable / Strong),0.77,0.19,0.58,52.75,5.8
+Melissa,Hidden OP (The Specialist),0.74,0.29,0.45,53.09,4.5
+Moskov,B-Tier (Reliable / Strong),0.73,0.08,0.65,50.77,6.5
+Hylos,D-Tier (Out of Meta / Weak),0.6799999999999999,0.24,0.44,47.86,4.4
+Zilong,D-Tier (Out of Meta / Weak),0.6599999999999999,0.29,0.37,46.64,3.7
+Lolita,Hidden OP (The Specialist),0.63,0.49,0.14,55.65,1.4000000000000001
+Martis,D-Tier (Out of Meta / Weak),0.6,0.18,0.42,46.99,4.2
+Nolan,B-Tier (Reliable / Strong),0.5900000000000001,0.2,0.39,50.83,3.9000000000000004
+Chip,C-Tier (Situational / Average),0.59,0.51,0.08,48.44,0.8
+Mathilda,D-Tier (Out of Meta / Weak),0.5700000000000001,0.37,0.2,44.8,2.0
+Novaria,D-Tier (Out of Meta / Weak),0.54,0.12,0.42,47.05,4.2
+Terizla,B-Tier (Reliable / Strong),0.47000000000000003,0.08,0.39,50.41,3.9000000000000004
+Baxia,B-Tier (Reliable / Strong),0.47000000000000003,0.28,0.19,50.12,1.9
+Gord,B-Tier (Reliable / Strong),0.46,0.08,0.38,51.67,3.8
+Aldous,C-Tier (Situational / Average),0.46,0.18,0.28,49.66,2.8000000000000003
+Argus,B-Tier (Reliable / Strong),0.45,0.23,0.22,51.16,2.2
+Jawhead,C-Tier (Situational / Average),0.44,0.12,0.32,48.19,3.2
+Yve,B-Tier (Reliable / Strong),0.42000000000000004,0.17,0.25,51.43,2.5
+Wanwan,D-Tier (Out of Meta / Weak),0.42000000000000004,0.22,0.2,46.79,2.0
+Dyrroth,D-Tier (Out of Meta / Weak),0.4,0.1,0.3,44.11,3.0
+Bane,B-Tier (Reliable / Strong),0.39,0.09,0.3,51.92,3.0
+Roger,C-Tier (Situational / Average),0.39,0.06,0.33,48.2,3.3000000000000003
+Ling,D-Tier (Out of Meta / Weak),0.39,0.11,0.28,46.3,2.8000000000000003
+Aurora,D-Tier (Out of Meta / Weak),0.37,0.06,0.31,47.9,3.1
+Harith,D-Tier (Out of Meta / Weak),0.37,0.07,0.3,46.48,3.0
+Vale,C-Tier (Situational / Average),0.32999999999999996,0.04,0.29,49.33,2.9
+Balmond,D-Tier (Out of Meta / Weak),0.31,0.15,0.16,41.51,1.6
+Edith,B-Tier (Reliable / Strong),0.30000000000000004,0.07,0.23,50.75,2.3000000000000003
+Popol and Kupa,B-Tier (Reliable / Strong),0.29000000000000004,0.07,0.22,51.93,2.2
+Bruno,C-Tier (Situational / Average),0.24000000000000002,0.04,0.2,48.91,2.0
+Luo Yi,D-Tier (Out of Meta / Weak),0.21000000000000002,0.04,0.17,47.29,1.7000000000000002
+Zhask,D-Tier (Out of Meta / Weak),0.2,0.05,0.15,47.71,1.5
+Aulus,B-Tier (Reliable / Strong),0.16,0.05,0.11,51.2,1.1
+Barats,C-Tier (Situational / Average),0.16,0.05,0.11,48.96,1.1
