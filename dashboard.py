@@ -37,11 +37,9 @@ if not df.empty:
     s_tier_count = len(df[df['Meta Tier'] == "S-Tier (Absolute Meta / Must Ban)"])
     st.sidebar.metric(label="Critical Threats (S-Tier)", value=s_tier_count)
     
-    # --- NEW: Last Updated Timestamp ---
+    # --- Last Updated Timestamp ---
     try:
-        # Get the time the CSV was last modified
         timestamp = os.path.getmtime("current_mlbb_meta_api.csv")
-        # Convert it to a readable format
         last_updated = datetime.datetime.fromtimestamp(timestamp).strftime('%B %d, %Y at %I:%M %p')
         st.sidebar.caption(f"🔄 **Last Updated:** {last_updated}")
     except Exception:
@@ -49,6 +47,14 @@ if not df.empty:
     
     st.sidebar.divider()
     
+    # --- Tactical Filters (RESTORED) ---
+    st.sidebar.markdown("### 🎯 Tactical Filters")
+    available_roles = ["All Roles", "Assassin", "Fighter", "Mage", "Marksman", "Support", "Tank", "Flex/Unknown"]
+    selected_role = st.sidebar.selectbox("Filter by Primary Role:", available_roles)
+    
+    st.sidebar.divider()
+    
+    # --- Top 3 Most Contested ---
     st.sidebar.markdown("### Top 3 Most Contested")
     top_3 = df.nlargest(3, 'Contest Rate (%)')
     for index, row in top_3.iterrows():
@@ -113,3 +119,4 @@ if not df.empty:
                 )
             else:
                 st.info(f"No heroes currently fall into the {tab_names[i]} category.")
+
