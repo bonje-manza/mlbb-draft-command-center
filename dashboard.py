@@ -1,7 +1,10 @@
 import streamlit as st
 import pandas as pd
 import json
+import os
+import datetime
 
+# 1. Page Configuration: Setting up the layout for an ultrawide monitor
 st.set_page_config(
     page_title="MLBB Immortal Command Center",
     page_icon="🛡️",
@@ -9,110 +12,62 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# 2. Loading the Intelligence
+# The @st.cache_data decorator tells Streamlit to only load the CSV once, 
+# keeping the dashboard lightning-fast when you switch tabs.
 @st.cache_data
 def load_meta_data():
     try:
         return pd.read_csv("current_mlbb_meta_api.csv")
     except FileNotFoundError:
-        st.error("Intelligence file missing! Please run 'meta_scout.py' first.")
+        st.error("Intelligence file missing! Please run 'meta_scout.py' first to extract the latest data.")
         return pd.DataFrame()
 
 df = load_meta_data()
 
-# --- DATA ENRICHMENT: The Hardcoded Role Database ---
-def load_role_database():
-    try:
-        with open('hero_roles.json', 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        st.warning("Role database missing! Using fallback roles.")
-        return {}
-
-role_database = load_role_database()
-
-if not df.empty:
-    # Strip any invisible spaces to ensure perfect matching
-    df['Hero'] = df['Hero'].astype(str).str.strip()
-    df['Role'] = df['Hero'].map(role_database).fillna("Flex/Unknown")
-
+# 3. The Dashboard UI
 st.title("🏆 Mythical Glory+ Drafting Intelligence")
 st.markdown("Live tactical hierarchy of the current Mobile Legends patch. **Sort, filter, and draft with mathematical precision.**")
 
 if not df.empty:
-    # --- SIDEBAR: Filters & Summaries ---
+    # --- SIDEBAR: The Analyst's Summary ---
     st.sidebar.header("Current Meta Snapshot")
     st.sidebar.metric(label="Total Heroes Analyzed", value=len(df))
     
+    s_tier_count = len(df[df['Meta Tier'] == "S-Tier (Absolute Meta / Must Ban)"])
+    st.sidebar.metric(label="Critical Threats (S-Tier)", value=s_tier_count)
+    
+    # --- NEW: Last Updated Timestamp ---
+    try:
+        # Get the time the CSV was last modified
+        timestamp = os.path.getmtime("current_mlbb_meta_api.csv")
+        # Convert it to a readable format
+        last_updated = datetime.datetime.fromtimestamp(timestamp).strftime('%B %d, %Y at %I:%M %p')
+        st.sidebar.caption(f"🔄 **Last Updated:** {last_updated}")
+    except Exception:
+        st.sidebar.caption("🔄 **Last Updated:** Unknown")
+    
     st.sidebar.divider()
     
-    st.sidebar.markdown("### 🎯 Tactical Filters")
-    available_roles = ["All Roles", "Assassin", "Fighter", "Mage", "Marksman", "Support", "Tank", "Flex/Unknown"]
-    selected_role = st.sidebar.selectbox("Filter by Primary Role:", available_roles)
-    
-    st.sidebar.divider()
     st.sidebar.markdown("### Top 3 Most Contested")
     top_3 = df.nlargest(3, 'Contest Rate (%)')
     for index, row in top_3.iterrows():
         st.sidebar.markdown(f"**{row['Hero']}** - {row['Contest Rate (%)']}%")
 
-    # --- MAIN CONSOLE: THE TEAM SYNERGY ANALYZER ---
-    st.subheader("🛠️ Live Team Synergy Analyzer")
-    st.markdown("Draft your squad to instantly analyze win conditions and critical weaknesses.")
+    # --- MAIN CONSOLE: The Tactical Heatmap ---
+    st.subheader("🔥 Meta Heatmap: The Most Contested Heroes")
+    # A quick bar chart so you can visually scan the biggest draft threats instantly
+    top_10_contested = df.nlargest(10, 'Contest Rate (%)')
+    chart_data = top_10_contested.set_index('Hero')['Contest Rate (%)']
+    st.bar_chart(chart_data, color="#ff4b4b")
     
-    # Grab the alphabetical list of all heroes for the dropdown
-    hero_list = df['Hero'].sort_values().tolist()
-    selected_team = st.multiselect("Select up to 5 heroes for your team:", options=hero_list, max_selections=5)
-    
-    if selected_team:
-        team_df = df[df['Hero'].isin(selected_team)]
-        team_roles = team_df['Role'].tolist()
-        
-        # Display the drafted team visually
-        cols = st.columns(5)
-        for i, (idx, row) in enumerate(team_df.iterrows()):
-            with cols[i]:
-                st.info(f"**{row['Hero']}**\n\n*{row['Role']}*")
-        
-        # --- THE SYNERGY ALGORITHM ---
-        warnings = []
-        
-        # 1. Frontline Check
-        frontline = team_roles.count('Tank') + team_roles.count('Fighter')
-        if frontline == 0:
-            warnings.append("🚨 **NO FRONTLINE:** You have 0 Tanks or Fighters. You will instantly lose Turtle and Lord fights.")
-            
-        # 2. Magic Damage Check
-        magic = team_roles.count('Mage')
-        # Hardcoding the exceptions: Magic-damage assassins/fighters
-        magic_flex = ['Aamon', 'Gusion', 'Joy', 'Karina', 'Harley', 'Julian', 'Guinevere', 'Silvanna']
-        has_magic_flex = any(hero in selected_team for hero in magic_flex)
-        
-        if magic >= 3:
-            warnings.append("⚠️ **TOO MUCH MAGIC:** The enemy will build Radiant Armor and Athena's Shield to completely negate your damage.")
-        elif magic == 0 and not has_magic_flex and len(selected_team) >= 3:
-            warnings.append("⚠️ **FULL PHYSICAL (AD):** Your team lacks Magic Damage. The enemy will build Antique Cuirass and become unkillable.")
-            
-        # 3. Squishy / Scaling Check
-        mm_count = team_roles.count('Marksman')
-        if mm_count > 1:
-            warnings.append("🚨 **TOO SQUISHY:** Multiple Marksmen makes your team incredibly vulnerable to early-game invades.")
-        elif mm_count == 0 and len(selected_team) >= 4:
-            warnings.append("⚠️ **NO LATE-GAME CARRY:** You lack a Marksman. If the game goes past 15 minutes, you will struggle to push high-ground towers.")
-            
-        # Display the tactical report
-        if warnings:
-            for w in warnings:
-                st.error(w)
-        elif len(selected_team) == 5:
-            st.success("✅ **PERFECT BALANCE:** Your draft has a lethal mix of frontline secure, split damage, and scaling potential.")
-        else:
-            st.info("Keep drafting to see your final synergy report...")
-            
     st.divider()
 
-    # --- THE TIER LIST TABS ---
+    # --- THE DRAFTING TABS ---
     st.subheader("🗂️ Hero Tiers")
     
+    # We define the strict hierarchy order
+    # We define the strict hierarchy order
     tier_categories = [
         "S-Tier (Absolute Meta / Must Ban)",
         "A-Tier (Comfort Staple)",
@@ -123,30 +78,33 @@ if not df.empty:
         "D-Tier (Out of Meta / Weak)"
     ]
     
+    # Create clean tab names (stripping away the descriptions)
     tab_names = [tier.split(" (")[0] for tier in tier_categories]
     tabs = st.tabs(tab_names)
     
+    # Populate each tab dynamically
     for i, tier_name in enumerate(tier_categories):
         with tabs[i]:
+            # Filter the dataframe for this specific tier
             tier_df = df[df['Meta Tier'] == tier_name].copy()
             
-            if selected_role != "All Roles":
-                tier_df = tier_df[tier_df['Role'] == selected_role]
-            
             if not tier_df.empty:
+                # Drop the 'Meta Tier' column since the tab name already tells us the tier
                 tier_df = tier_df.drop(columns=['Meta Tier'])
-                cols = ['Hero', 'Role', 'Contest Rate (%)', 'Ban Rate', 'Pick Rate', 'Win Rate', 'True Match Presence (%)']
-                existing_cols = [c for c in cols if c in tier_df.columns]
-                tier_df = tier_df[existing_cols]
                 
+                # Display the interactive, sortable table
                 st.dataframe(
                     tier_df,
                     use_container_width=True,
                     hide_index=True,
+                    # We can use Pandas Styler inside Streamlit to highlight the win rates
                     column_config={
-                        "Win Rate": st.column_config.NumberColumn("Win Rate (%)", format="%.2f"),
+                        "Win Rate": st.column_config.NumberColumn(
+                            "Win Rate (%)",
+                            format="%.2f",
+                        ),
                         "Contest Rate (%)": st.column_config.ProgressColumn(
-                            "Threat Level",
+                            "Threat Level (Contest Rate)",
                             format="%.2f%%",
                             min_value=0,
                             max_value=100,
@@ -154,4 +112,4 @@ if not df.empty:
                     }
                 )
             else:
-                st.info(f"No {selected_role}s currently fall into the {tab_names[i]} category.")
+                st.info(f"No heroes currently fall into the {tab_names[i]} category.")
