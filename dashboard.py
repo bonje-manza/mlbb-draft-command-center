@@ -127,7 +127,7 @@ if not df.empty:
     st.divider()
 
     # --- THE TIER LIST TABS ---
-    st.subheader("🗂️ Hero Tiers")
+    st.subheader("🗂️ Hero Tiers & True Power Rankings")
     
     tier_categories = [
         "S-Tier (Absolute Meta / Must Ban)",
@@ -139,20 +139,32 @@ if not df.empty:
         "D-Tier (Out of Meta / Weak)"
     ]
     
-    tab_names = [tier.split(" (")[0] for tier in tier_categories]
+    # Prepend "All Heroes" to the tab names
+    tab_names = ["All Heroes"] + [tier.split(" (")[0] for tier in tier_categories]
     tabs = st.tabs(tab_names)
     
-    for i, tier_name in enumerate(tier_categories):
+    for i, tab_name in enumerate(tab_names):
         with tabs[i]:
-            tier_df = df[df['Meta Tier'] == tier_name].copy()
+            # If it's the master list, copy the whole dataframe. Otherwise, filter by the specific Meta Tier.
+            if tab_name == "All Heroes":
+                tier_df = df.copy()
+            else:
+                # Match the tab back to the full tier category name
+                full_tier_name = tier_categories[i - 1] 
+                tier_df = df[df['Meta Tier'] == full_tier_name].copy()
             
             # THE RESTORED FILTER LOGIC
             if selected_role != "All Roles":
                 tier_df = tier_df[tier_df['Role'] == selected_role]
             
             if not tier_df.empty:
-                tier_df = tier_df.drop(columns=['Meta Tier'])
-                cols = ['Hero', 'Role', 'Contest Rate (%)', 'Ban Rate', 'Pick Rate', 'Win Rate', 'True Match Presence (%)']
+                # We only drop 'Meta Tier' if we are in a specific tier tab to avoid redundancy.
+                # In the "All Heroes" tab, seeing the 'Meta Tier' is tactically necessary.
+                if tab_name != "All Heroes":
+                    tier_df = tier_df.drop(columns=['Meta Tier'])
+                
+                # Expose the new advanced metrics from meta_scout.py
+                cols = ['True Overall Rank', 'Hero', 'Role', 'Meta Tier', 'True Power Score', 'Contest Rate (%)', 'Ban Rate', 'Pick Rate', 'Win Rate']
                 existing_cols = [c for c in cols if c in tier_df.columns]
                 tier_df = tier_df[existing_cols]
                 
@@ -161,6 +173,8 @@ if not df.empty:
                     use_container_width=True,
                     hide_index=True,
                     column_config={
+                        "True Overall Rank": st.column_config.NumberColumn("Rank", format="%d"),
+                        "True Power Score": st.column_config.NumberColumn("Power Score", format="%.1f"),
                         "Win Rate": st.column_config.NumberColumn("Win Rate (%)", format="%.2f"),
                         "Contest Rate (%)": st.column_config.ProgressColumn(
                             "Threat Level",
@@ -171,4 +185,4 @@ if not df.empty:
                     }
                 )
             else:
-                st.info(f"No {selected_role}s currently fall into the {tab_names[i]} category.")
+                st.info(f"No {selected_role}s currently fall into the {tab_name} category.")
