@@ -1,8 +1,11 @@
 import requests
 import pandas as pd
 
-def get_mlbb_meta_api():
+def get_mlbb_meta_api(dynamic_url=None):
     print("Executing the cURL Heist...")
+
+    # If the dashboard provides a new URL, use it. Otherwise, use the fallback.
+    endpoint = dynamic_url if dynamic_url else 'https://api.gms.moontontech.com/api/gms/source/2669606/2756569'
 
     headers = {
         'accept': 'application/json, text/plain, */*',
@@ -10,18 +13,8 @@ def get_mlbb_meta_api():
         'authorization': 'DTQW9B4FuLk0JaVBl1PBK4TWung=',
         'content-type': 'application/json;charset=UTF-8',
         'origin': 'https://www.mobilelegends.com',
-        'priority': 'u=1, i',
         'referer': 'https://www.mobilelegends.com/',
-        'sec-ch-ua': '"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'cross-site',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36',
-        'x-actid': '2669607',
-        'x-appid': '2669606',
-        'x-lang': 'en',
     }
 
     json_data = {
@@ -43,14 +36,13 @@ def get_mlbb_meta_api():
     }
 
     try:
-        response = requests.post('https://api.gms.moontontech.com/api/gms/source/2669606/2756569', headers=headers, json=json_data)
+        response = requests.post(endpoint, headers=headers, json=json_data)
         response.raise_for_status() 
         
         data = response.json()
-        print("Infiltration successful! JSON payload secured.")
+        print(f"Infiltration successful at {endpoint}! JSON payload secured.")
         
         # --- THE RESTORED RECURSIVE SEARCH ALGORITHM ---
-        # This completely ignores Moonton's folder names and just finds the largest list in the payload.
         lists_found = []
         def search_for_lists(obj):
             if isinstance(obj, list):
@@ -72,23 +64,18 @@ def get_mlbb_meta_api():
         # --- ROBUST DATA EXTRACTION ---
         heroes_data = []
         for hero in hero_list:
-            # Moonton randomly shifts between wrapping stats in a 'data' folder or keeping them exposed.
-            # This safely handles both.
             core_data = hero.get('data', hero) if isinstance(hero.get('data'), dict) else hero
             
-            # Safely extract the name, whether it's nested in another dictionary or just a raw string
             name_obj = core_data.get('main_hero', 'Unknown')
             if isinstance(name_obj, dict):
                 name = str(name_obj.get('data', {}).get('name', 'Unknown')).strip()
             else:
                 name = str(name_obj).strip()
             
-            # Extract decimals and format them to percentages
             win_rate = float(core_data.get('main_hero_win_rate', 0.0) or 0.0)
             pick_rate = float(core_data.get('main_hero_appearance_rate', 0.0) or 0.0)
             ban_rate = float(core_data.get('main_hero_ban_rate', 0.0) or 0.0)
             
-            # Safeguard: Multiply by 100 only if Moonton is sending raw decimals (e.g. 0.54 instead of 54.0)
             if win_rate <= 1.0 and win_rate > 0:
                 win_rate *= 100
                 pick_rate *= 100
@@ -106,8 +93,6 @@ def get_mlbb_meta_api():
     except Exception as e:
         print(f"Execution Error: {e}")
         return pd.DataFrame()
-        
-# ... (Keep your analyze_meta and export_to_excel functions exactly as they are down here!) ...
 
 
 def analyze_meta(df):

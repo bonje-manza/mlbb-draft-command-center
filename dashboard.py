@@ -71,6 +71,34 @@ if not df.empty:
     for index, row in top_3.iterrows():
         st.sidebar.markdown(f"**{row['Hero']}** - {row['Contest Rate (%)']}%")
 
+        # --- 🔐 ADMIN OVERRIDE PANEL ---
+    st.sidebar.divider()
+    with st.sidebar.expander("🔐 Admin Override (API Patch)"):
+        st.warning("Update the API endpoint if Moonton shifts the data feed.")
+        new_api_url = st.text_input("New Endpoint URL:", placeholder="https://api.gms.moontontech.com/api/...")
+        admin_pass = st.text_input("Passcode:", type="password")
+        
+        if st.button("Execute Infiltration"):
+            if admin_pass == "Glory2026": # You can change this passcode
+                if new_api_url:
+                    with st.spinner("Bypassing Moonton firewalls..."):
+                        # Import the backend dynamically so Streamlit can use it
+                        from meta_scout import get_mlbb_meta_api, analyze_meta
+                        
+                        raw_data = get_mlbb_meta_api(new_api_url)
+                        if not raw_data.empty:
+                            analyzed_meta = analyze_meta(raw_data)
+                            analyzed_meta.to_csv("current_mlbb_meta_api.csv", index=False)
+                            st.cache_data.clear() # Force Streamlit to drop the old data
+                            st.success("Target acquired! Live database overwritten.")
+                            st.rerun() # Refresh the page immediately
+                        else:
+                            st.error("Infiltration failed. Verify the URL syntax.")
+                else:
+                    st.error("Missing target URL.")
+            else:
+                st.error("Access Denied.")
+
     # --- MAIN CONSOLE: THE TEAM SYNERGY ANALYZER ---
     st.subheader("🛠️ Live Team Synergy Analyzer")
     st.markdown("Draft your squad to instantly analyze win conditions and critical weaknesses.")
