@@ -126,8 +126,11 @@ if not df.empty:
             
     st.divider()
 
-    # --- THE TIER LIST TABS ---
+    # --- THE TIER LIST TABS & DATA VISUALIZATION ---
     st.subheader("🗂️ Hero Tiers & True Power Rankings")
+    
+    # Tactical Search Override
+    search_query = st.text_input("🔍 Quick Search Hero:", placeholder="Type a hero name... (e.g., Ling, Gloo)").strip().title()
     
     tier_categories = [
         "S-Tier (Absolute Meta / Must Ban)",
@@ -139,50 +142,72 @@ if not df.empty:
         "D-Tier (Out of Meta / Weak)"
     ]
     
-    # Prepend "All Heroes" to the tab names
     tab_names = ["All Heroes"] + [tier.split(" (")[0] for tier in tier_categories]
     tabs = st.tabs(tab_names)
     
+    # Styling function for Win Rate
+    def color_win_rate(val):
+        if val >= 52.0:
+            return 'color: #00FF00; font-weight: bold;' # Bright Green for high win rate
+        elif val >= 50.0:
+            return 'color: #90EE90;' # Light green for positive
+        elif val < 48.0:
+            return 'color: #FF4500; font-weight: bold;' # Red for terrible win rate
+        else:
+            return 'color: #FFA07A;' # Light red for slightly negative
+
     for i, tab_name in enumerate(tab_names):
         with tabs[i]:
-            # If it's the master list, copy the whole dataframe. Otherwise, filter by the specific Meta Tier.
             if tab_name == "All Heroes":
                 tier_df = df.copy()
             else:
-                # Match the tab back to the full tier category name
                 full_tier_name = tier_categories[i - 1] 
                 tier_df = df[df['Meta Tier'] == full_tier_name].copy()
             
-            # THE RESTORED FILTER LOGIC
+            # Apply Role Filter
             if selected_role != "All Roles":
                 tier_df = tier_df[tier_df['Role'] == selected_role]
+                
+            # Apply Search Filter (if active)
+            if search_query:
+                tier_df = tier_df[tier_df['Hero'].str.contains(search_query, case=False, na=False)]
             
             if not tier_df.empty:
-                # We only drop 'Meta Tier' if we are in a specific tier tab to avoid redundancy.
-                # In the "All Heroes" tab, seeing the 'Meta Tier' is tactically necessary.
                 if tab_name != "All Heroes":
                     tier_df = tier_df.drop(columns=['Meta Tier'])
                 
-                # Expose the new advanced metrics from meta_scout.py
                 cols = ['True Overall Rank', 'Hero', 'Role', 'Meta Tier', 'True Power Score', 'Contest Rate (%)', 'Ban Rate', 'Pick Rate', 'Win Rate']
                 existing_cols = [c for c in cols if c in tier_df.columns]
                 tier_df = tier_df[existing_cols]
                 
+                # Apply Pandas Styling to the dataframe before passing to Streamlit
+                styled_df = tier_df.style.map(color_win_rate, subset=['Win Rate']).format(
+                    {"Win Rate": "{:.2f}%"}
+                )
+                
                 st.dataframe(
-                    tier_df,
+                    styled_df,
                     use_container_width=True,
                     hide_index=True,
                     column_config={
-                        "True Overall Rank": st.column_config.NumberColumn("Rank", format="%d"),
-                        "True Power Score": st.column_config.NumberColumn("Power Score", format="%.1f"),
-                        "Win Rate": st.column_config.NumberColumn("Win Rate (%)", format="%.2f"),
+                        "True Overall Rank": st.column_config.NumberColumn("🏆 Rank", format="%d"),
+                        "Hero": st.column_config.TextColumn("🦸 Hero"),
+                        "Role": st.column_config.TextColumn("⚔️ Role"),
+                        "Meta Tier": st.column_config.TextColumn("📊 Meta Tier"),
+                        "True Power Score": st.column_config.NumberColumn("⚡ Power Score", format="%.1f"),
                         "Contest Rate (%)": st.column_config.ProgressColumn(
-                            "Threat Level",
+                            "🔥 Threat Level (Contest)",
                             format="%.2f%%",
                             min_value=0,
                             max_value=100,
-                        )
+                        ),
+                        "Ban Rate": st.column_config.NumberColumn("🚫 Ban Rate", format="%.2f%%"),
+                        "Pick Rate": st.column_config.NumberColumn("✅ Pick Rate", format="%.2f%%"),
+                        "Win Rate": st.column_config.Column("📈 Win Rate") # Formatted via pandas styling above
                     }
                 )
             else:
-                st.info(f"No {selected_role}s currently fall into the {tab_name} category.")
+                if search_query:
+                    st.info(f"No results found for '{search_query}' in the {tab_name} category.")
+                else:
+                    st.info(f"No {selected_role}s currently fall into the {tab_name} category.")
