@@ -1,133 +1,526 @@
 {
-    "Aamon": {"primary": "Jungler", "secondary": null},
-    "Akai": {"primary": "Roamer", "secondary": "Jungler"},
-    "Aldous": {"primary": "EXP Lane", "secondary": "Jungler"},
-    "Alice": {"primary": "Mid Lane", "secondary": "EXP Lane"},
-    "Alpha": {"primary": "Jungler", "secondary": "EXP Lane"},
-    "Alucard": {"primary": "Jungler", "secondary": "EXP Lane"},
-    "Angela": {"primary": "Roamer", "secondary": "Mid Lane"},
-    "Argus": {"primary": "EXP Lane", "secondary": null},
-    "Arlott": {"primary": "EXP Lane", "secondary": "Roamer"},
-    "Atlas": {"primary": "Roamer", "secondary": null},
-    "Aulus": {"primary": "Jungler", "secondary": null},
-    "Aurora": {"primary": "Mid Lane", "secondary": null},
-    "Badang": {"primary": "EXP Lane", "secondary": null},
-    "Balmond": {"primary": "Jungler", "secondary": "EXP Lane"},
-    "Bane": {"primary": "EXP Lane", "secondary": "Jungler"},
-    "Barats": {"primary": "Jungler", "secondary": "EXP Lane"},
-    "Baxia": {"primary": "Jungler", "secondary": "Roamer"},
-    "Beatrix": {"primary": "Gold Lane", "secondary": null},
-    "Belerick": {"primary": "Roamer", "secondary": "EXP Lane"},
-    "Benedetta": {"primary": "EXP Lane", "secondary": "Jungler"},
-    "Brody": {"primary": "Gold Lane", "secondary": null},
-    "Bruno": {"primary": "Gold Lane", "secondary": null},
-    "Carmilla": {"primary": "Roamer", "secondary": "Jungler"},
-    "Cecilion": {"primary": "Mid Lane", "secondary": null},
-    "Cici": {"primary": "EXP Lane", "secondary": null},
-    "Chou": {"primary": "EXP Lane", "secondary": "Roamer"},
-    "Chip": {"primary": "Roamer", "secondary": null},
-    "Claude": {"primary": "Gold Lane", "secondary": null},
-    "Clint": {"primary": "Gold Lane", "secondary": null},
-    "Cyclops": {"primary": "Mid Lane", "secondary": "Jungler"},
-    "Chang'e": {"primary": "Mid Lane", "secondary": "Gold Lane"},
-    "Diggie": {"primary": "Roamer", "secondary": null},
-    "Dyrroth": {"primary": "EXP Lane", "secondary": "Jungler"},
-    "Edith": {"primary": "Roamer", "secondary": "EXP Lane"},
-    "Esmeralda": {"primary": "EXP Lane", "secondary": "Mid Lane"},
-    "Estes": {"primary": "Roamer", "secondary": null},
-    "Eudora": {"primary": "Mid Lane", "secondary": null},
-    "Fanny": {"primary": "Jungler", "secondary": null},
-    "Faramis": {"primary": "Mid Lane", "secondary": "Roamer"},
-    "Floryn": {"primary": "Roamer", "secondary": null},
-    "Franco": {"primary": "Roamer", "secondary": null},
-    "Fredrinn": {"primary": "Jungler", "secondary": "Roamer"},
-    "Freya": {"primary": "Jungler", "secondary": "EXP Lane"},
-    "Gatotkaca": {"primary": "EXP Lane", "secondary": "Roamer"},
-    "Gloo": {"primary": "EXP Lane", "secondary": "Roamer"},
-    "Gord": {"primary": "Mid Lane", "secondary": null},
-    "Granger": {"primary": "Jungler", "secondary": "Gold Lane"},
-    "Grock": {"primary": "Roamer", "secondary": "EXP Lane"},
-    "Guinevere": {"primary": "EXP Lane", "secondary": "Jungler"},
-    "Gusion": {"primary": "Jungler", "secondary": "Mid Lane"},
-    "Hanabi": {"primary": "Gold Lane", "secondary": null},
-    "Hanzo": {"primary": "Jungler", "secondary": null},
-    "Harith": {"primary": "Gold Lane", "secondary": "Mid Lane"},
-    "Harley": {"primary": "Jungler", "secondary": "Mid Lane"},
-    "Hayabusa": {"primary": "Jungler", "secondary": null},
-    "Helcurt": {"primary": "Jungler", "secondary": "Roamer"},
-    "Hilda": {"primary": "Roamer", "secondary": "EXP Lane"},
-    "Hylos": {"primary": "Roamer", "secondary": "EXP Lane"},
-    "Irithel": {"primary": "Gold Lane", "secondary": null},
-    "Ixia": {"primary": "Gold Lane", "secondary": null},
-    "Jawhead": {"primary": "Jungler", "secondary": "Roamer"},
-    "Johnson": {"primary": "Roamer", "secondary": "EXP Lane"},
-    "Joy": {"primary": "EXP Lane", "secondary": "Jungler"},
-    "Julian": {"primary": "EXP Lane", "secondary": "Jungler"},
-    "Kadita": {"primary": "Mid Lane", "secondary": "Roamer"},
-    "Kagura": {"primary": "Mid Lane", "secondary": null},
-    "Kaja": {"primary": "Roamer", "secondary": "EXP Lane"},
-    "Kalea": {"primary": "EXP Lane", "secondary": null},
-    "Karina": {"primary": "Jungler", "secondary": null},
-    "Karrie": {"primary": "Gold Lane", "secondary": "Jungler"},
-    "Khaleed": {"primary": "EXP Lane", "secondary": "Roamer"},
-    "Khufra": {"primary": "Roamer", "secondary": null},
-    "Kimmy": {"primary": "Gold Lane", "secondary": "Jungler"},
-    "Lancelot": {"primary": "Jungler", "secondary": null},
-    "Lapu-Lapu": {"primary": "EXP Lane", "secondary": null},
-    "Layla": {"primary": "Gold Lane", "secondary": null},
-    "Leomord": {"primary": "Jungler", "secondary": "EXP Lane"},
-    "Lesley": {"primary": "Gold Lane", "secondary": null},
-    "Ling": {"primary": "Jungler", "secondary": null},
-    "Lolita": {"primary": "Roamer", "secondary": null},
-    "Lukas": {"primary": "EXP Lane", "secondary": null},
-    "Lunox": {"primary": "Mid Lane", "secondary": "Gold Lane"},
-    "Luo Yi": {"primary": "Mid Lane", "secondary": null},
-    "Lylia": {"primary": "Mid Lane", "secondary": null},
-    "Martis": {"primary": "Jungler", "secondary": "EXP Lane"},
-    "Masha": {"primary": "EXP Lane", "secondary": "Roamer"},
-    "Mathilda": {"primary": "Roamer", "secondary": "Mid Lane"},
-    "Melissa": {"primary": "Gold Lane", "secondary": null},
-    "Minotaur": {"primary": "Roamer", "secondary": null},
-    "Minsitthar": {"primary": "EXP Lane", "secondary": "Roamer"},
-    "Miya": {"primary": "Gold Lane", "secondary": null},
-    "Moskov": {"primary": "Gold Lane", "secondary": null},
-    "Nana": {"primary": "Mid Lane", "secondary": null},
-    "Natalia": {"primary": "Roamer", "secondary": "Jungler"},
-    "Natan": {"primary": "Gold Lane", "secondary": null},
-    "Nolan": {"primary": "Jungler", "secondary": null},
-    "Novaria": {"primary": "Mid Lane", "secondary": "Roamer"},
-    "Obsidia": {"primary": "Gold Lane", "secondary": null},
-    "Odette": {"primary": "Mid Lane", "secondary": null},
-    "Paquito": {"primary": "EXP Lane", "secondary": "Jungler"},
-    "Pharsa": {"primary": "Mid Lane", "secondary": null},
-    "Phoveus": {"primary": "EXP Lane", "secondary": null},
-    "Popol and Kupa": {"primary": "Gold Lane", "secondary": "Jungler"},
-    "Rafaela": {"primary": "Roamer", "secondary": null},
-    "Roger": {"primary": "Gold Lane", "secondary": "Jungler"},
-    "Ruby": {"primary": "EXP Lane", "secondary": "Roamer"},
-    "Saber": {"primary": "Jungler", "secondary": "Roamer"},
-    "Selena": {"primary": "Roamer", "secondary": "Mid Lane"},
-    "Silvanna": {"primary": "EXP Lane", "secondary": "Roamer"},
-    "Sora": {"primary": "EXP Lane", "secondary": null},
-    "Sun": {"primary": "EXP Lane", "secondary": "Jungler"},
-    "Suyou": {"primary": "Jungler", "secondary": "EXP Lane"},
-    "Terizla": {"primary": "EXP Lane", "secondary": null},
-    "Thamuz": {"primary": "EXP Lane", "secondary": "Jungler"},
-    "Tigreal": {"primary": "Roamer", "secondary": null},
-    "Uranus": {"primary": "EXP Lane", "secondary": null},
-    "Vale": {"primary": "Mid Lane", "secondary": null},
-    "Valentina": {"primary": "Mid Lane", "secondary": "EXP Lane"},
-    "Valir": {"primary": "Mid Lane", "secondary": "Roamer"},
-    "Vexana": {"primary": "Mid Lane", "secondary": null},
-    "Wanwan": {"primary": "Gold Lane", "secondary": null},
-    "X.Borg": {"primary": "EXP Lane", "secondary": "Jungler"},
-    "Xavier": {"primary": "Mid Lane", "secondary": null},
-    "Yi Sun-shin": {"primary": "Jungler", "secondary": null},
-    "Yin": {"primary": "EXP Lane", "secondary": "Jungler"},
-    "Yu Zhong": {"primary": "EXP Lane", "secondary": null},
-    "Yve": {"primary": "Mid Lane", "secondary": null},
-    "Zetian": {"primary": "Mid Lane", "secondary": null},
-    "Zhask": {"primary": "Mid Lane", "secondary": null},
-    "Zhuxin": {"primary": "Mid Lane", "secondary": null},
-    "Zilong": {"primary": "EXP Lane", "secondary": "Jungler"}
+    "Aamon": {
+        "primary": "Jungler",
+        "secondary": null
+    },
+    "Akai": {
+        "primary": "Roamer",
+        "secondary": "Jungler"
+    },
+    "Aldous": {
+        "primary": "EXP Lane",
+        "secondary": "Jungler"
+    },
+    "Alice": {
+        "primary": "Mid Lane",
+        "secondary": "EXP Lane"
+    },
+    "Alpha": {
+        "primary": "Jungler",
+        "secondary": "EXP Lane"
+    },
+    "Alucard": {
+        "primary": "Jungler",
+        "secondary": "EXP Lane"
+    },
+    "Angela": {
+        "primary": "Roamer",
+        "secondary": "Mid Lane"
+    },
+    "Argus": {
+        "primary": "EXP Lane",
+        "secondary": null
+    },
+    "Arlott": {
+        "primary": "EXP Lane",
+        "secondary": "Roamer"
+    },
+    "Atlas": {
+        "primary": "Roamer",
+        "secondary": null
+    },
+    "Aulus": {
+        "primary": "Jungler",
+        "secondary": null
+    },
+    "Aurora": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Badang": {
+        "primary": "EXP Lane",
+        "secondary": null
+    },
+    "Balmond": {
+        "primary": "Jungler",
+        "secondary": "EXP Lane"
+    },
+    "Bane": {
+        "primary": "EXP Lane",
+        "secondary": "Jungler"
+    },
+    "Barats": {
+        "primary": "Jungler",
+        "secondary": "EXP Lane"
+    },
+    "Baxia": {
+        "primary": "Jungler",
+        "secondary": "Roamer"
+    },
+    "Beatrix": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Belerick": {
+        "primary": "Roamer",
+        "secondary": "EXP Lane"
+    },
+    "Benedetta": {
+        "primary": "EXP Lane",
+        "secondary": "Jungler"
+    },
+    "Brody": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Bruno": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Carmilla": {
+        "primary": "Roamer",
+        "secondary": "Jungler"
+    },
+    "Cecilion": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Cici": {
+        "primary": "EXP Lane",
+        "secondary": null
+    },
+    "Chou": {
+        "primary": "EXP Lane",
+        "secondary": "Roamer"
+    },
+    "Chip": {
+        "primary": "Roamer",
+        "secondary": null
+    },
+    "Claude": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Clint": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Cyclops": {
+        "primary": "Mid Lane",
+        "secondary": "Jungler"
+    },
+    "Chang'e": {
+        "primary": "Mid Lane",
+        "secondary": "Gold Lane"
+    },
+    "Diggie": {
+        "primary": "Roamer",
+        "secondary": null
+    },
+    "Dyrroth": {
+        "primary": "EXP Lane",
+        "secondary": "Jungler"
+    },
+    "Edith": {
+        "primary": "Roamer",
+        "secondary": "EXP Lane"
+    },
+    "Esmeralda": {
+        "primary": "EXP Lane",
+        "secondary": "Mid Lane"
+    },
+    "Estes": {
+        "primary": "Roamer",
+        "secondary": null
+    },
+    "Eudora": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Fanny": {
+        "primary": "Jungler",
+        "secondary": null
+    },
+    "Faramis": {
+        "primary": "Mid Lane",
+        "secondary": "Roamer"
+    },
+    "Floryn": {
+        "primary": "Roamer",
+        "secondary": null
+    },
+    "Franco": {
+        "primary": "Roamer",
+        "secondary": null
+    },
+    "Fredrinn": {
+        "primary": "Jungler",
+        "secondary": "Roamer"
+    },
+    "Freya": {
+        "primary": "Jungler",
+        "secondary": "EXP Lane"
+    },
+    "Gatotkaca": {
+        "primary": "EXP Lane",
+        "secondary": "Roamer"
+    },
+    "Gloo": {
+        "primary": "EXP Lane",
+        "secondary": "Roamer"
+    },
+    "Gord": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Granger": {
+        "primary": "Jungler",
+        "secondary": "Gold Lane"
+    },
+    "Grock": {
+        "primary": "Roamer",
+        "secondary": "EXP Lane"
+    },
+    "Guinevere": {
+        "primary": "EXP Lane",
+        "secondary": "Jungler"
+    },
+    "Gusion": {
+        "primary": "Jungler",
+        "secondary": "Mid Lane"
+    },
+    "Hanabi": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Hanzo": {
+        "primary": "Jungler",
+        "secondary": null
+    },
+    "Harith": {
+        "primary": "Gold Lane",
+        "secondary": "Mid Lane"
+    },
+    "Harley": {
+        "primary": "Jungler",
+        "secondary": "Mid Lane"
+    },
+    "Hayabusa": {
+        "primary": "Jungler",
+        "secondary": null
+    },
+    "Helcurt": {
+        "primary": "Roamer",
+        "secondary": "Jungler"
+    },
+    "Hilda": {
+        "primary": "Roamer",
+        "secondary": "EXP Lane"
+    },
+    "Hylos": {
+        "primary": "Roamer",
+        "secondary": "EXP Lane"
+    },
+    "Irithel": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Ixia": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Jawhead": {
+        "primary": "Jungler",
+        "secondary": "Roamer"
+    },
+    "Johnson": {
+        "primary": "Roamer",
+        "secondary": "EXP Lane"
+    },
+    "Joy": {
+        "primary": "EXP Lane",
+        "secondary": "Jungler"
+    },
+    "Julian": {
+        "primary": "EXP Lane",
+        "secondary": "Jungler"
+    },
+    "Kadita": {
+        "primary": "Mid Lane",
+        "secondary": "Roamer"
+    },
+    "Kagura": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Kaja": {
+        "primary": "Roamer",
+        "secondary": "EXP Lane"
+    },
+    "Kalea": {
+        "primary": "EXP Lane",
+        "secondary": null
+    },
+    "Karina": {
+        "primary": "Jungler",
+        "secondary": null
+    },
+    "Karrie": {
+        "primary": "Gold Lane",
+        "secondary": "Jungler"
+    },
+    "Khaleed": {
+        "primary": "EXP Lane",
+        "secondary": "Roamer"
+    },
+    "Khufra": {
+        "primary": "Roamer",
+        "secondary": null
+    },
+    "Kimmy": {
+        "primary": "Gold Lane",
+        "secondary": "Jungler"
+    },
+    "Lancelot": {
+        "primary": "Jungler",
+        "secondary": null
+    },
+    "Lapu-Lapu": {
+        "primary": "EXP Lane",
+        "secondary": null
+    },
+    "Layla": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Leomord": {
+        "primary": "Jungler",
+        "secondary": "EXP Lane"
+    },
+    "Lesley": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Ling": {
+        "primary": "Jungler",
+        "secondary": null
+    },
+    "Lolita": {
+        "primary": "Roamer",
+        "secondary": null
+    },
+    "Lukas": {
+        "primary": "EXP Lane",
+        "secondary": null
+    },
+    "Lunox": {
+        "primary": "Mid Lane",
+        "secondary": "Gold Lane"
+    },
+    "Luo Yi": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Lylia": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Martis": {
+        "primary": "Jungler",
+        "secondary": "EXP Lane"
+    },
+    "Masha": {
+        "primary": "EXP Lane",
+        "secondary": "Roamer"
+    },
+    "Mathilda": {
+        "primary": "Roamer",
+        "secondary": "Mid Lane"
+    },
+    "Melissa": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Minotaur": {
+        "primary": "Roamer",
+        "secondary": null
+    },
+    "Minsitthar": {
+        "primary": "EXP Lane",
+        "secondary": "Roamer"
+    },
+    "Miya": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Moskov": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Nana": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Natalia": {
+        "primary": "Roamer",
+        "secondary": "Jungler"
+    },
+    "Natan": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Nolan": {
+        "primary": "Jungler",
+        "secondary": null
+    },
+    "Novaria": {
+        "primary": "Mid Lane",
+        "secondary": "Roamer"
+    },
+    "Obsidia": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "Odette": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Paquito": {
+        "primary": "EXP Lane",
+        "secondary": "Jungler"
+    },
+    "Pharsa": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Phoveus": {
+        "primary": "EXP Lane",
+        "secondary": null
+    },
+    "Popol and Kupa": {
+        "primary": "Gold Lane",
+        "secondary": "Jungler"
+    },
+    "Rafaela": {
+        "primary": "Roamer",
+        "secondary": null
+    },
+    "Roger": {
+        "primary": "Gold Lane",
+        "secondary": "Jungler"
+    },
+    "Ruby": {
+        "primary": "EXP Lane",
+        "secondary": "Roamer"
+    },
+    "Saber": {
+        "primary": "Jungler",
+        "secondary": "Roamer"
+    },
+    "Selena": {
+        "primary": "Roamer",
+        "secondary": "Mid Lane"
+    },
+    "Silvanna": {
+        "primary": "EXP Lane",
+        "secondary": "Roamer"
+    },
+    "Sora": {
+        "primary": "EXP Lane",
+        "secondary": null
+    },
+    "Sun": {
+        "primary": "EXP Lane",
+        "secondary": "Jungler"
+    },
+    "Suyou": {
+        "primary": "Jungler",
+        "secondary": "EXP Lane"
+    },
+    "Terizla": {
+        "primary": "EXP Lane",
+        "secondary": null
+    },
+    "Thamuz": {
+        "primary": "EXP Lane",
+        "secondary": "Jungler"
+    },
+    "Tigreal": {
+        "primary": "Roamer",
+        "secondary": null
+    },
+    "Uranus": {
+        "primary": "EXP Lane",
+        "secondary": null
+    },
+    "Vale": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Valentina": {
+        "primary": "Mid Lane",
+        "secondary": "EXP Lane"
+    },
+    "Valir": {
+        "primary": "Mid Lane",
+        "secondary": "Roamer"
+    },
+    "Vexana": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Wanwan": {
+        "primary": "Gold Lane",
+        "secondary": null
+    },
+    "X.Borg": {
+        "primary": "EXP Lane",
+        "secondary": "Jungler"
+    },
+    "Xavier": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Yi Sun-shin": {
+        "primary": "Jungler",
+        "secondary": null
+    },
+    "Yin": {
+        "primary": "EXP Lane",
+        "secondary": "Jungler"
+    },
+    "Yu Zhong": {
+        "primary": "EXP Lane",
+        "secondary": null
+    },
+    "Yve": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Zetian": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Zhask": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Zhuxin": {
+        "primary": "Mid Lane",
+        "secondary": null
+    },
+    "Zilong": {
+        "primary": "EXP Lane",
+        "secondary": "Jungler"
+    }
 }

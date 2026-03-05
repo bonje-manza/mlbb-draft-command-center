@@ -53,6 +53,9 @@ if not df.empty:
     df['Secondary Lane'] = df['Hero'].apply(lambda x: lane_database.get(x, {}).get('secondary', None))
     df['All Lanes'] = df.apply(lambda row: [row['Primary Lane']] + ([row['Secondary Lane']] if row['Secondary Lane'] else []), axis=1)
 
+    # Grab the alphabetical list of all heroes for use in selectors
+    hero_list = df['Hero'].sort_values().tolist()
+
 st.title("Mythical Glory+ Drafting Intelligence")
 st.markdown("Advanced tactical analysis of the current Mobile Legends competitive landscape. Optimized for high-level draft strategy.")
 
@@ -90,15 +93,24 @@ if not df.empty:
     for index, row in top_3.iterrows():
         st.sidebar.markdown(f"**{row['Hero']}** ({row['Contest Rate (%)']}%)")
 
-        # --- ADMINISTRATIVE CONTROLS ---
+    # --- ADMINISTRATIVE CONTROLS ---
     st.sidebar.divider()
     with st.sidebar.expander("Administrative Controls"):
-        st.info("Update the API endpoint to synchronize with latest patch data.")
-        new_api_url = st.text_input("API Endpoint URL:", placeholder="https://api.gms.moontontech.com/api/...")
+        st.info("Authorized personnel only.")
         admin_pass = st.text_input("Authorization Token:", type="password")
         
-        if st.button("Update Data Source"):
-            if admin_pass == "Glory2026": 
+        if admin_pass == "Glory2026":
+            st.session_state['is_admin'] = True
+            st.success("Administrative access granted.")
+        else:
+            st.session_state['is_admin'] = False
+
+        if st.session_state.get('is_admin'):
+            st.divider()
+            st.markdown("### Data Synchronization")
+            new_api_url = st.text_input("API Endpoint URL:", placeholder="https://api.gms.moontontech.com/api/...")
+            
+            if st.button("Update Data Source"):
                 if new_api_url:
                     with st.spinner("Synchronizing with remote server..."):
                         # Import the backend dynamically so Streamlit can use it
@@ -115,15 +127,48 @@ if not df.empty:
                             st.error("Synchronization failed. Invalid response from endpoint.")
                 else:
                     st.error("API URL required.")
-            else:
-                st.error("Invalid authorization token.")
+
+            st.divider()
+            st.markdown("### Hero Lane Management")
+            
+            manage_hero = st.selectbox("Select Hero to Configure:", options=hero_list)
+            
+            if manage_hero:
+                current_p = lane_database.get(manage_hero, {}).get('primary', 'Unknown')
+                current_s = lane_database.get(manage_hero, {}).get('secondary', None)
+                
+                lane_options = ["Mid Lane", "Gold Lane", "EXP Lane", "Jungler", "Roamer"]
+                secondary_options = [None] + lane_options
+                
+                # Find index for default values
+                try: p_idx = lane_options.index(current_p)
+                except ValueError: p_idx = 0
+                
+                try: s_idx = secondary_options.index(current_s)
+                except ValueError: s_idx = 0
+                
+                new_primary = st.selectbox("Primary Lane:", options=lane_options, index=p_idx)
+                new_secondary = st.selectbox("Secondary Lane:", options=secondary_options, index=s_idx)
+                
+                if st.button("Save Tactical Update"):
+                    lane_database[manage_hero] = {
+                        "primary": new_primary,
+                        "secondary": new_secondary
+                    }
+                    try:
+                        with open('hero_lanes.json', 'w', encoding='utf-8') as f:
+                            json.dump(lane_database, f, indent=4)
+                        st.cache_data.clear()
+                        st.success(f"Tactical profile for {manage_hero} updated.")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Failed to save update: {e}")
+    # --- END ADMINISTRATIVE CONTROLS ---
 
     # --- MAIN CONSOLE: TEAM SYNERGY ANALYZER ---
     st.subheader("Team Synergy Analyzer")
     st.markdown("Analyze win conditions and potential vulnerabilities for your selected draft.")
     
-    # Grab the alphabetical list of all heroes for the dropdown
-    hero_list = df['Hero'].sort_values().tolist()
     selected_team = st.multiselect("Draft Selection (Up to 5 Heroes):", options=hero_list, max_selections=5)
     
     if selected_team:
