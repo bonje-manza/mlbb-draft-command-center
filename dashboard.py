@@ -21,7 +21,7 @@ def load_meta_data():
 
 df = load_meta_data()
 
-# --- DATA ENRICHMENT: Role Database ---
+# --- DATA ENRICHMENT: Role & Lane Database ---
 @st.cache_data
 def load_role_database():
     try:
@@ -31,12 +31,27 @@ def load_role_database():
         st.warning("Role database unavailable. Using default role mappings.")
         return {}
 
+@st.cache_data
+def load_lane_database():
+    try:
+        with open('hero_lanes.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        st.warning("Lane database unavailable. Using default lane mappings.")
+        return {}
+
 role_database = load_role_database()
+lane_database = load_lane_database()
 
 if not df.empty:
     # Strip any invisible spaces to ensure perfect matching
     df['Hero'] = df['Hero'].astype(str).str.strip()
     df['Role'] = df['Hero'].map(role_database).fillna("Flex/Unknown")
+    
+    # Extract Primary and Secondary Lanes
+    df['Primary Lane'] = df['Hero'].apply(lambda x: lane_database.get(x, {}).get('primary', 'Unknown'))
+    df['Secondary Lane'] = df['Hero'].apply(lambda x: lane_database.get(x, {}).get('secondary', None))
+    df['All Lanes'] = df.apply(lambda row: [row['Primary Lane']] + ([row['Secondary Lane']] if row['Secondary Lane'] else []), axis=1)
 
 st.title("Mythical Glory+ Drafting Intelligence")
 st.markdown("Advanced tactical analysis of the current Mobile Legends competitive landscape. Optimized for high-level draft strategy.")
@@ -63,6 +78,9 @@ if not df.empty:
     st.sidebar.markdown("### Tactical Filters")
     available_roles = ["All Roles", "Assassin", "Fighter", "Mage", "Marksman", "Support", "Tank", "Flex/Unknown"]
     selected_role = st.sidebar.selectbox("Filter by Primary Role:", available_roles)
+    
+    available_lanes = ["All Lanes", "Mid Lane", "Gold Lane", "EXP Lane", "Jungler", "Roamer"]
+    selected_lane = st.sidebar.selectbox("Filter by Recommended Lane:", available_lanes)
     
     st.sidebar.divider()
     
@@ -112,12 +130,13 @@ if not df.empty:
         # Preserve selection order visually
         team_df = df[df['Hero'].isin(selected_team)].set_index('Hero').reindex(selected_team).reset_index()
         team_roles = team_df['Role'].tolist()
+        team_lanes = team_df['All Lanes'].tolist()
         
         # Display the drafted team visually
         cols = st.columns(5)
         for i, row in team_df.iterrows():
             with cols[i]:
-                st.info(f"**{row['Hero']}**\n\n*{row['Role']}*")
+                st.info(f"**{row['Hero']}**\n\n*{row['Role']}*\n\n`{row['Primary Lane']}`")
         
         # --- SYNERGY ANALYSIS ---
         warnings = []
@@ -144,6 +163,21 @@ if not df.empty:
             warnings.append("**VULNERABILITY: LOW DURABILITY.** Multiple Marksmen increase vulnerability to early-game aggression.")
         elif mm_count == 0 and len(selected_team) == 5:
             warnings.append("**ADVISORY: NO LATE-GAME CARRY.** Lacking a primary Marksman may hinder high-ground siege potential.")
+
+        # 4. Lane Coverage Check
+        if len(selected_team) == 5:
+            required_lanes = ["Mid Lane", "Gold Lane", "EXP Lane", "Jungler", "Roamer"]
+            # Check if we can assign each hero to a unique required lane
+            # This is a simplified check: does the union of all possible lanes for these 5 heroes cover all 5 required lanes?
+            # A more robust check would use a matching algorithm, but for MLBB most heroes have clear roles.
+            covered_lanes = set()
+            for lanes in team_lanes:
+                for lane in lanes:
+                    covered_lanes.add(lane)
+            
+            missing_lanes = [lane for lane in required_lanes if lane not in covered_lanes]
+            if missing_lanes:
+                warnings.append(f"**VULNERABILITY: INCOMPLETE LANE COVERAGE.** Missing: {', '.join(missing_lanes)}.")
             
         # Display the tactical report - Only show critical errors once 5 heroes are picked
         if len(selected_team) == 5:
@@ -198,6 +232,10 @@ if not df.empty:
             # Apply Role Filter
             if selected_role != "All Roles":
                 tier_df = tier_df[tier_df['Role'] == selected_role]
+
+            # Apply Lane Filter
+            if selected_lane != "All Lanes":
+                tier_df = tier_df[tier_df['All Lanes'].apply(lambda x: selected_lane in x)]
                 
             # Apply Search Filter (if active)
             if search_query:
@@ -207,7 +245,7 @@ if not df.empty:
                 if tab_name != "All Heroes":
                     tier_df = tier_df.drop(columns=['Meta Tier'])
                 
-                cols = ['True Overall Rank', 'Hero', 'Role', 'Meta Tier', 'True Power Score', 'Contest Rate (%)', 'Ban Rate', 'Pick Rate', 'Win Rate']
+                cols = ['True Overall Rank', 'Hero', 'Role', 'Primary Lane', 'Secondary Lane', 'Meta Tier', 'True Power Score', 'Contest Rate (%)', 'Ban Rate', 'Pick Rate', 'Win Rate']
                 existing_cols = [c for c in cols if c in tier_df.columns]
                 tier_df = tier_df[existing_cols]
                 
@@ -224,6 +262,8 @@ if not df.empty:
                         "True Overall Rank": st.column_config.NumberColumn("Rank", format="%d"),
                         "Hero": st.column_config.TextColumn("Hero"),
                         "Role": st.column_config.TextColumn("Role"),
+                        "Primary Lane": st.column_config.TextColumn("Primary Lane"),
+                        "Secondary Lane": st.column_config.TextColumn("Secondary Lane"),
                         "Meta Tier": st.column_config.TextColumn("Meta Tier"),
                         "True Power Score": st.column_config.NumberColumn("Power Score", format="%.1f"),
                         "Contest Rate (%)": st.column_config.ProgressColumn(
