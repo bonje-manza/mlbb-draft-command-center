@@ -221,7 +221,7 @@ if not df.empty:
                     use_container_width=True,
                     hide_index=True,
                     column_config={
-                        "True Overall Rank": st.column_config.NumberColumn("🏆 Rank", format="%d"),
+                        "True Overall Rank": st.column_config.NumberColumn("Rank", format="%d"),
                         "Hero": st.column_config.TextColumn("Hero"),
                         "Role": st.column_config.TextColumn("Role"),
                         "Meta Tier": st.column_config.TextColumn("Meta Tier"),
