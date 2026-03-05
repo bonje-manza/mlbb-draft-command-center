@@ -222,19 +222,19 @@ if not df.empty:
                     hide_index=True,
                     column_config={
                         "True Overall Rank": st.column_config.NumberColumn("🏆 Rank", format="%d"),
-                        "Hero": st.column_config.TextColumn("🦸 Hero"),
-                        "Role": st.column_config.TextColumn("⚔️ Role"),
-                        "Meta Tier": st.column_config.TextColumn("📊 Meta Tier"),
-                        "True Power Score": st.column_config.NumberColumn("⚡ Power Score", format="%.1f"),
+                        "Hero": st.column_config.TextColumn("Hero"),
+                        "Role": st.column_config.TextColumn("Role"),
+                        "Meta Tier": st.column_config.TextColumn("Meta Tier"),
+                        "True Power Score": st.column_config.NumberColumn("Power Score", format="%.1f"),
                         "Contest Rate (%)": st.column_config.ProgressColumn(
-                            "🔥 Threat Level (Contest)",
+                            "Threat Level (Contest)",
                             format="%.2f%%",
                             min_value=0,
                             max_value=100,
                         ),
-                        "Ban Rate": st.column_config.NumberColumn("🚫 Ban Rate", format="%.2f%%"),
-                        "Pick Rate": st.column_config.NumberColumn("✅ Pick Rate", format="%.2f%%"),
-                        "Win Rate": st.column_config.Column("📈 Win Rate") # Formatted via pandas styling above
+                        "Ban Rate": st.column_config.NumberColumn("Ban Rate", format="%.2f%%"),
+                        "Pick Rate": st.column_config.NumberColumn("Pick Rate", format="%.2f%%"),
+                        "Win Rate": st.column_config.Column("Win Rate") # Formatted via pandas styling above
                     }
                 )
             else:
