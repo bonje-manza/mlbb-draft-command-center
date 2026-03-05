@@ -6,7 +6,7 @@ import datetime
 
 st.set_page_config(
     page_title="MLBB Immortal Command Center",
-    page_icon="🛡️",
+    page_icon="None",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -16,19 +16,19 @@ def load_meta_data():
     try:
         return pd.read_csv("current_mlbb_meta_api.csv")
     except FileNotFoundError:
-        st.error("Intelligence file missing! Please run 'meta_scout.py' first.")
+        st.error("Data source missing. Please run the synchronization script.")
         return pd.DataFrame()
 
 df = load_meta_data()
 
-# --- DATA ENRICHMENT: The Hardcoded Role Database ---
+# --- DATA ENRICHMENT: Role Database ---
 @st.cache_data
 def load_role_database():
     try:
         with open('hero_roles.json', 'r', encoding='utf-8') as f:
             return json.load(f)
     except Exception:
-        st.warning("Role database missing! Using fallback roles.")
+        st.warning("Role database unavailable. Using default role mappings.")
         return {}
 
 role_database = load_role_database()
@@ -38,51 +38,51 @@ if not df.empty:
     df['Hero'] = df['Hero'].astype(str).str.strip()
     df['Role'] = df['Hero'].map(role_database).fillna("Flex/Unknown")
 
-st.title("🏆 Mythical Glory+ Drafting Intelligence")
-st.markdown("Live tactical hierarchy of the current Mobile Legends patch. **Sort, filter, and draft with mathematical precision.**")
+st.title("Mythical Glory+ Drafting Intelligence")
+st.markdown("Advanced tactical analysis of the current Mobile Legends competitive landscape. Optimized for high-level draft strategy.")
 
 if not df.empty:
-    # --- SIDEBAR: The Analyst's Summary ---
-    st.sidebar.header("Current Meta Snapshot")
+    # --- SIDEBAR: Meta Overview ---
+    st.sidebar.header("Meta Snapshot")
     st.sidebar.metric(label="Total Heroes Analyzed", value=len(df))
     
     s_tier_count = len(df[df['Meta Tier'] == "S-Tier (Absolute Meta / Must Ban)"])
-    st.sidebar.metric(label="Critical Threats (S-Tier)", value=s_tier_count)
+    st.sidebar.metric(label="High-Priority Threats (S-Tier)", value=s_tier_count)
     
     # --- Last Updated Timestamp ---
     try:
         timestamp = os.path.getmtime("current_mlbb_meta_api.csv")
         last_updated = datetime.datetime.fromtimestamp(timestamp).strftime('%B %d, %Y at %I:%M %p')
-        st.sidebar.caption(f"🔄 **Last Updated:** {last_updated}")
+        st.sidebar.caption(f"Last Updated: {last_updated}")
     except Exception:
-        st.sidebar.caption("🔄 **Last Updated:** Unknown")
+        st.sidebar.caption("Last Updated: Unknown")
     
     st.sidebar.divider()
     
     # --- Tactical Filters ---
-    st.sidebar.markdown("### 🎯 Tactical Filters")
+    st.sidebar.markdown("### Tactical Filters")
     available_roles = ["All Roles", "Assassin", "Fighter", "Mage", "Marksman", "Support", "Tank", "Flex/Unknown"]
     selected_role = st.sidebar.selectbox("Filter by Primary Role:", available_roles)
     
     st.sidebar.divider()
     
     # --- Top 3 Most Contested ---
-    st.sidebar.markdown("### Top 3 Most Contested")
+    st.sidebar.markdown("### Most Contested Heroes")
     top_3 = df.nlargest(3, 'Contest Rate (%)')
     for index, row in top_3.iterrows():
-        st.sidebar.markdown(f"**{row['Hero']}** - {row['Contest Rate (%)']}%")
+        st.sidebar.markdown(f"**{row['Hero']}** ({row['Contest Rate (%)']}%)")
 
-        # --- 🔐 ADMIN OVERRIDE PANEL ---
+        # --- ADMINISTRATIVE CONTROLS ---
     st.sidebar.divider()
-    with st.sidebar.expander("🔐 Admin Override (API Patch)"):
-        st.warning("Update the API endpoint if Moonton shifts the data feed.")
-        new_api_url = st.text_input("New Endpoint URL:", placeholder="https://api.gms.moontontech.com/api/...")
-        admin_pass = st.text_input("Passcode:", type="password")
+    with st.sidebar.expander("Administrative Controls"):
+        st.info("Update the API endpoint to synchronize with latest patch data.")
+        new_api_url = st.text_input("API Endpoint URL:", placeholder="https://api.gms.moontontech.com/api/...")
+        admin_pass = st.text_input("Authorization Token:", type="password")
         
-        if st.button("Execute Infiltration"):
-            if admin_pass == "Glory2026": # You can change this passcode
+        if st.button("Update Data Source"):
+            if admin_pass == "Glory2026": 
                 if new_api_url:
-                    with st.spinner("Bypassing Moonton firewalls..."):
+                    with st.spinner("Synchronizing with remote server..."):
                         # Import the backend dynamically so Streamlit can use it
                         from meta_scout import get_mlbb_meta_api, analyze_meta
                         
@@ -90,23 +90,23 @@ if not df.empty:
                         if not raw_data.empty:
                             analyzed_meta = analyze_meta(raw_data)
                             analyzed_meta.to_csv("current_mlbb_meta_api.csv", index=False)
-                            st.cache_data.clear() # Force Streamlit to drop the old data
-                            st.success("Target acquired! Live database overwritten.")
-                            st.rerun() # Refresh the page immediately
+                            st.cache_data.clear() 
+                            st.success("Synchronization successful. Local database updated.")
+                            st.rerun() 
                         else:
-                            st.error("Infiltration failed. Verify the URL syntax.")
+                            st.error("Synchronization failed. Invalid response from endpoint.")
                 else:
-                    st.error("Missing target URL.")
+                    st.error("API URL required.")
             else:
-                st.error("Access Denied.")
+                st.error("Invalid authorization token.")
 
-    # --- MAIN CONSOLE: THE TEAM SYNERGY ANALYZER ---
-    st.subheader("🛠️ Live Team Synergy Analyzer")
-    st.markdown("Draft your squad to instantly analyze win conditions and critical weaknesses.")
+    # --- MAIN CONSOLE: TEAM SYNERGY ANALYZER ---
+    st.subheader("Team Synergy Analyzer")
+    st.markdown("Analyze win conditions and potential vulnerabilities for your selected draft.")
     
     # Grab the alphabetical list of all heroes for the dropdown
     hero_list = df['Hero'].sort_values().tolist()
-    selected_team = st.multiselect("Select up to 5 heroes for your team:", options=hero_list, max_selections=5)
+    selected_team = st.multiselect("Draft Selection (Up to 5 Heroes):", options=hero_list, max_selections=5)
     
     if selected_team:
         # Preserve selection order visually
@@ -119,13 +119,13 @@ if not df.empty:
             with cols[i]:
                 st.info(f"**{row['Hero']}**\n\n*{row['Role']}*")
         
-        # --- THE SYNERGY ALGORITHM ---
+        # --- SYNERGY ANALYSIS ---
         warnings = []
         
         # 1. Frontline Check
         frontline = team_roles.count('Tank') + team_roles.count('Fighter')
         if frontline == 0:
-            warnings.append("🚨 **NO FRONTLINE:** You have 0 Tanks or Fighters. You will instantly lose Turtle and Lord fights.")
+            warnings.append("**VULNERABILITY: NO FRONTLINE.** Lack of defensive utility may compromise objective control.")
             
         # 2. Magic Damage Check
         magic = team_roles.count('Mage')
@@ -134,34 +134,34 @@ if not df.empty:
         has_magic_flex = any(hero in selected_team for hero in magic_flex)
         
         if magic >= 3:
-            warnings.append("⚠️ **TOO MUCH MAGIC:** The enemy will build Radiant Armor and Athena's Shield to completely negate your damage.")
+            warnings.append("**VULNERABILITY: EXCESSIVE MAGIC DAMAGE.** Enemy defensive itemization can easily mitigate overall team output.")
         elif magic == 0 and not has_magic_flex and len(selected_team) >= 3:
-            warnings.append("⚠️ **FULL PHYSICAL (AD):** Your team lacks Magic Damage. The enemy will build Antique Cuirass and become unkillable.")
+            warnings.append("**VULNERABILITY: LACK OF MAGIC DAMAGE.** Entirely physical composition allows enemies to stack armor efficiently.")
             
         # 3. Squishy / Scaling Check
         mm_count = team_roles.count('Marksman')
         if mm_count > 1:
-            warnings.append("🚨 **TOO SQUISHY:** Multiple Marksmen makes your team incredibly vulnerable to early-game invades.")
+            warnings.append("**VULNERABILITY: LOW DURABILITY.** Multiple Marksmen increase vulnerability to early-game aggression.")
         elif mm_count == 0 and len(selected_team) == 5:
-            warnings.append("⚠️ **NO LATE-GAME CARRY:** You lack a Marksman. If the game goes past 15 minutes, you will struggle to push high-ground towers.")
+            warnings.append("**ADVISORY: NO LATE-GAME CARRY.** Lacking a primary Marksman may hinder high-ground siege potential.")
             
         # Display the tactical report - Only show critical errors once 5 heroes are picked
         if len(selected_team) == 5:
             if warnings:
                 for w in warnings:
-                    st.error(w)
+                    st.warning(w)
             else:
-                st.success("✅ **PERFECT BALANCE:** Your draft has a lethal mix of frontline secure, split damage, and scaling potential.")
+                st.success("COMPOSITION BALANCED: Selection provides a stable mix of frontline presence, damage types, and scaling.")
         else:
-            st.info(f"Drafting in progress ({len(selected_team)}/5)... Keep picking to see your final synergy report.")
+            st.info(f"Drafting in progress ({len(selected_team)}/5). Analysis will finalize upon full selection.")
             
     st.divider()
 
-    # --- THE TIER LIST TABS & DATA VISUALIZATION ---
-    st.subheader("🗂️ Hero Tiers & True Power Rankings")
+    # --- TIER LIST & DATA VISUALIZATION ---
+    st.subheader("Hero Performance and Tier Rankings")
     
     # Tactical Search Override
-    search_query = st.text_input("🔍 Quick Search Hero:", placeholder="Type a hero name... (e.g., Ling, Gloo)").strip().title()
+    search_query = st.text_input("Quick Search Hero:", placeholder="Search by name...").strip().title()
     
     tier_categories = [
         "S-Tier (Absolute Meta / Must Ban)",
@@ -179,13 +179,13 @@ if not df.empty:
     # Styling function for Win Rate
     def color_win_rate(val):
         if val >= 52.0:
-            return 'color: #00FF00; font-weight: bold;' # Bright Green for high win rate
+            return 'color: #2E7D32; font-weight: bold;' # Professional Forest Green
         elif val >= 50.0:
-            return 'color: #90EE90;' # Light green for positive
+            return 'color: #4CAF50;' # standard green
         elif val < 48.0:
-            return 'color: #FF4500; font-weight: bold;' # Red for terrible win rate
+            return 'color: #C62828; font-weight: bold;' # Professional Deep Red
         else:
-            return 'color: #FFA07A;' # Light red for slightly negative
+            return 'color: #EF5350;' # standard red
 
     for i, tab_name in enumerate(tab_names):
         with tabs[i]:
@@ -211,7 +211,7 @@ if not df.empty:
                 existing_cols = [c for c in cols if c in tier_df.columns]
                 tier_df = tier_df[existing_cols]
                 
-                # Apply Pandas Styling to the dataframe before passing to Streamlit
+                # Apply Pandas Styling
                 styled_df = tier_df.style.map(color_win_rate, subset=['Win Rate']).format(
                     {"Win Rate": "{:.2f}%"}
                 )
@@ -227,18 +227,18 @@ if not df.empty:
                         "Meta Tier": st.column_config.TextColumn("Meta Tier"),
                         "True Power Score": st.column_config.NumberColumn("Power Score", format="%.1f"),
                         "Contest Rate (%)": st.column_config.ProgressColumn(
-                            "Threat Level (Contest)",
+                            "Contest Rate",
                             format="%.2f%%",
                             min_value=0,
                             max_value=100,
                         ),
                         "Ban Rate": st.column_config.NumberColumn("Ban Rate", format="%.2f%%"),
                         "Pick Rate": st.column_config.NumberColumn("Pick Rate", format="%.2f%%"),
-                        "Win Rate": st.column_config.Column("Win Rate") # Formatted via pandas styling above
+                        "Win Rate": st.column_config.Column("Win Rate")
                     }
                 )
             else:
                 if search_query:
                     st.info(f"No results found for '{search_query}' in the {tab_name} category.")
                 else:
-                    st.info(f"No {selected_role}s currently fall into the {tab_name} category.")
+                    st.info(f"No data available for the selected filters.")

@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 
 def get_mlbb_meta_api(dynamic_url=None):
-    print("Executing the cURL Heist...")
+    print("Initiating data retrieval...")
 
     # If the dashboard provides a new URL, use it. Otherwise, use the fallback.
     endpoint = dynamic_url if dynamic_url else 'https://api.gms.moontontech.com/api/gms/source/2669606/2756569'
@@ -40,9 +40,9 @@ def get_mlbb_meta_api(dynamic_url=None):
         response.raise_for_status() 
         
         data = response.json()
-        print(f"Infiltration successful at {endpoint}! JSON payload secured.")
+        print(f"Data successfully retrieved from {endpoint}.")
         
-        # --- THE RESTORED RECURSIVE SEARCH ALGORITHM ---
+        # --- RECURSIVE SEARCH ALGORITHM ---
         lists_found = []
         def search_for_lists(obj):
             if isinstance(obj, list):
@@ -55,13 +55,13 @@ def get_mlbb_meta_api(dynamic_url=None):
         valid_lists = [l for l in lists_found if len(l) > 0 and isinstance(l[0], dict)]
         
         if not valid_lists:
-            print("CRITICAL ERROR: No hero data structure found in the JSON.")
+            print("Error: No hero data structure found in the response.")
             return pd.DataFrame()
             
         hero_list = max(valid_lists, key=len)
-        print(f"Data folder located! Extracted {len(hero_list)} heroes.")
+        print(f"Dataset identified. Extracted {len(hero_list)} hero entries.")
         
-        # --- ROBUST DATA EXTRACTION ---
+        # --- DATA EXTRACTION ---
         heroes_data = []
         for hero in hero_list:
             core_data = hero.get('data', hero) if isinstance(hero.get('data'), dict) else hero
@@ -91,73 +91,47 @@ def get_mlbb_meta_api(dynamic_url=None):
         return pd.DataFrame(heroes_data)
 
     except Exception as e:
-        print(f"Execution Error: {e}")
+        print(f"System Error: {e}")
         return pd.DataFrame()
 
 
 def analyze_meta(df):
     if df.empty:
-        print("No data to analyze.")
+        print("No data available for analysis.")
         return df
         
-    print(f"Applying macro-analysis to {len(df)} heroes...")
+    print(f"Performing meta-analysis on {len(df)} hero profiles...")
     
     df['Contest Rate (%)'] = df['Ban Rate'] + df['Pick Rate']
     df['True Match Presence (%)'] = df['Pick Rate'] * 10
     
-    # --- THE TRUE POWER ALGORITHM V2 (WEIGHTED EFFICACY) ---
-    # 1. The Fear Index: Bans indicate undeniable meta threat, weighted heavier than Picks.
+    # --- TRUE POWER ALGORITHM V2 ---
     fear_index = (df['Ban Rate'] * 0.6) + (df['Pick Rate'] * 0.25)
-    
-    # 2. Performance Delta: How far from the 50% baseline is the hero?
     wr_delta = df['Win Rate'] - 50.0
-    
-    # 3. Efficacy Multiplier: Scales the win rate impact based on sample size (Pick Rate).
-    # High pick + high WR = Massive boost. High pick + low WR = Catastrophic penalty.
     performance_score = wr_delta * (4.0 + (df['Pick Rate'] * 0.1))
     
-    # Calculate the final composite score
     df['True Power Score'] = round(fear_index + performance_score, 1)
     
     def assign_tier(row):
-        # S-Tier: The Permabans OR heavily contested winners
         if row['Ban Rate'] >= 35.0 or (row['Contest Rate (%)'] >= 50.0 and row['Win Rate'] >= 50.0):
             return "S-Tier (Absolute Meta / Must Ban)"
-        
-        # Solo-Queue Trap: High presence (>=15% of matches) but actively dragging the team down
         elif row['Pick Rate'] >= 1.5 and row['Win Rate'] < 47.5:
             return "Solo-Queue Trap (Avoid at all costs)"
-            
-        # A-Tier: High contestation OR solid presence with a positive win rate
-        # Checked BEFORE Hidden OP so heavily contested heroes don't slip through
         elif row['Contest Rate (%)'] >= 20.0 or (row['Pick Rate'] >= 1.5 and row['Win Rate'] >= 50.5):
             return "A-Tier (Comfort Staple)"
-            
-        # Hidden OP: Low pick rate, low ban rate, but mathematically dominant when played
         elif row['Pick Rate'] < 1.0 and row['Ban Rate'] < 10.0 and row['Win Rate'] >= 52.5:
             return "Hidden OP (The Specialist)"
-            
-        # B-Tier: Above average baseline, reliable
         elif row['Win Rate'] >= 50.0:
             return "B-Tier (Reliable / Strong)"
-            
-        # C-Tier: Below average, highly situational
         elif row['Win Rate'] >= 47.5:
             return "C-Tier (Situational / Average)"
-            
-        # D-Tier: The bottom of the barrel
         else:
             return "D-Tier (Out of Meta / Weak)"
 
     df['Meta Tier'] = df.apply(assign_tier, axis=1)
-    
-    # SORT BY THE NEW TRUE POWER SCORE
     df = df.sort_values(by='True Power Score', ascending=False).reset_index(drop=True)
-    
-    # ASSIGN THE TRUE OVERALL RANK
     df.insert(0, 'True Overall Rank', range(1, len(df) + 1))
     
-    # Reorder columns to showcase the new metrics
     df = df[['True Overall Rank', 'Hero', 'Meta Tier', 'True Power Score', 'Contest Rate (%)', 'Ban Rate', 'Pick Rate', 'Win Rate', 'True Match Presence (%)']]
     
     return df
@@ -166,7 +140,7 @@ def export_to_excel(df):
     if df.empty:
         return
         
-    print("\nDrafting tactical spreadsheet with color-coded intel...")
+    print("\nGenerating tactical spreadsheet...")
     file_name = "MLBB_Meta_Tiers.xlsx"
     
     tier_colors = {
@@ -178,53 +152,34 @@ def export_to_excel(df):
     }
     
     with pd.ExcelWriter(file_name, engine='openpyxl') as writer:
-        
-        # --- NEW: The "All Heroes" Master Ranking Sheet ---
-        # Create a copy so we don't accidentally alter the main DataFrame
         df_all = df.copy()
-        
-        # Insert the 'Overall Rank' column at the very front (Index 0)
         df_all.insert(0, 'Overall Rank', range(1, len(df_all) + 1))
-        
-        # Write it to the first sheet
         df_all.to_excel(writer, sheet_name="All Heroes", index=False)
         
-        # Format the master sheet
         ws_all = writer.sheets["All Heroes"]
-        ws_all.sheet_properties.tabColor = "000000" # Black tab color for the master sheet
+        ws_all.sheet_properties.tabColor = "000000" 
         for column_cells in ws_all.columns:
             length = max(len(str(cell.value)) for cell in column_cells)
             ws_all.column_dimensions[column_cells[0].column_letter].width = length + 2
 
-        # --- EXISTING: The Individual Tier Sheets ---
         grouped_meta = df.groupby('Meta Tier')
-        
         for tier_name, tier_data in grouped_meta:
             clean_tab_name = tier_name.split(' (')[0].strip()
-            # We remove the Meta Tier column here because the whole sheet is just that tier
             clean_df = tier_data.drop(columns=['Meta Tier'])
-            
             clean_df.to_excel(writer, sheet_name=clean_tab_name, index=False)
-            
             ws = writer.sheets[clean_tab_name]
-            
             if clean_tab_name in tier_colors:
                 ws.sheet_properties.tabColor = tier_colors[clean_tab_name]
-            
-            # AUTO-FORMATTING: Adjusting column widths automatically
             for column_cells in ws.columns:
                 length = max(len(str(cell.value)) for cell in column_cells)
                 ws.column_dimensions[column_cells[0].column_letter].width = length + 2
                 
-    print(f"Spreadsheet secured! Open '{file_name}' to view your optimized drafting dashboard.")
+    print(f"Export complete. File saved as '{file_name}'.")
 
 if __name__ == "__main__":
     raw_data = get_mlbb_meta_api()
     analyzed_meta = analyze_meta(raw_data)
     
     if not analyzed_meta.empty:
-        # Save the master raw CSV (Optional, but good for backups)
         analyzed_meta.to_csv("current_mlbb_meta_api.csv", index=False)
-        
-        # Trigger the new Excel grouping function
         export_to_excel(analyzed_meta)
