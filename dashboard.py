@@ -22,6 +22,7 @@ def load_meta_data():
 df = load_meta_data()
 
 # --- DATA ENRICHMENT: The Hardcoded Role Database ---
+@st.cache_data
 def load_role_database():
     try:
         with open('hero_roles.json', 'r', encoding='utf-8') as f:
@@ -108,12 +109,13 @@ if not df.empty:
     selected_team = st.multiselect("Select up to 5 heroes for your team:", options=hero_list, max_selections=5)
     
     if selected_team:
-        team_df = df[df['Hero'].isin(selected_team)]
+        # Preserve selection order visually
+        team_df = df[df['Hero'].isin(selected_team)].set_index('Hero').reindex(selected_team).reset_index()
         team_roles = team_df['Role'].tolist()
         
         # Display the drafted team visually
         cols = st.columns(5)
-        for i, (idx, row) in enumerate(team_df.iterrows()):
+        for i, row in team_df.iterrows():
             with cols[i]:
                 st.info(f"**{row['Hero']}**\n\n*{row['Role']}*")
         
@@ -140,17 +142,18 @@ if not df.empty:
         mm_count = team_roles.count('Marksman')
         if mm_count > 1:
             warnings.append("🚨 **TOO SQUISHY:** Multiple Marksmen makes your team incredibly vulnerable to early-game invades.")
-        elif mm_count == 0 and len(selected_team) >= 4:
+        elif mm_count == 0 and len(selected_team) == 5:
             warnings.append("⚠️ **NO LATE-GAME CARRY:** You lack a Marksman. If the game goes past 15 minutes, you will struggle to push high-ground towers.")
             
-        # Display the tactical report
-        if warnings:
-            for w in warnings:
-                st.error(w)
-        elif len(selected_team) == 5:
-            st.success("✅ **PERFECT BALANCE:** Your draft has a lethal mix of frontline secure, split damage, and scaling potential.")
+        # Display the tactical report - Only show critical errors once 5 heroes are picked
+        if len(selected_team) == 5:
+            if warnings:
+                for w in warnings:
+                    st.error(w)
+            else:
+                st.success("✅ **PERFECT BALANCE:** Your draft has a lethal mix of frontline secure, split damage, and scaling potential.")
         else:
-            st.info("Keep drafting to see your final synergy report...")
+            st.info(f"Drafting in progress ({len(selected_team)}/5)... Keep picking to see your final synergy report.")
             
     st.divider()
 
