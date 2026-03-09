@@ -11,7 +11,7 @@ from meta_scout import API_ENDPOINT_ENV, REQUIRED_API_TOKEN_ENV, analyze_meta, g
 DATA_FILE = "current_mlbb_meta_api.csv"
 ROLE_FILE = "hero_roles.json"
 LANE_FILE = "hero_lanes.json"
-ADMIN_PASSWORD_ENV = "MLBB_ADMIN_PASSWORD"
+ADMIN_PASSWORD_ENV = "Glory2026"
 REQUIRED_COLUMNS = {
     "True Overall Rank",
     "Hero",
