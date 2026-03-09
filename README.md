@@ -55,6 +55,12 @@ Start the interactive dashboard:
 streamlit run dashboard.py
 ```
 
+### Run Tests
+Run the draft engine test suite with:
+```bash
+python -m unittest discover -s tests -p "test_*.py"
+```
+
 ## 🎯 Key Features
 - **Structured Draft Analysis:** Lane coverage, frontline, damage mix, scaling, and overall draft score.
 - **Recommendation Engine:** Best next picks and high-priority ban suggestions based on current locks.

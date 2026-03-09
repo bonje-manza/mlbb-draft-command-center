@@ -563,6 +563,39 @@ def render_pick_panel(title, selection_df, side_label):
     )
 
 
+def render_banned_panel(banned_heroes):
+    slots = []
+    max_slots = max(5, len(banned_heroes)) if banned_heroes else 5
+    for slot_index in range(max_slots):
+        if slot_index < len(banned_heroes):
+            slot_body = (
+                "<div class='cc-slot cc-slot-enemy'>"
+                f"<div class='cc-slot-index'>Ban {slot_index + 1}</div>"
+                f"<div class='cc-slot-hero'>{banned_heroes[slot_index]}</div>"
+                "<div class='cc-slot-meta'>Removed from pick and ban recommendations</div>"
+                "</div>"
+            )
+        else:
+            slot_body = (
+                "<div class='cc-slot cc-slot-enemy'>"
+                f"<div class='cc-slot-index'>Ban {slot_index + 1}</div>"
+                "<div class='cc-slot-empty'>No banned hero</div>"
+                "</div>"
+            )
+        slots.append(slot_body)
+
+    st.markdown(
+        (
+            "<div class='cc-panel'>"
+            "<div class='cc-panel-title'>Draft State</div>"
+            "<div class='cc-panel-heading'>Banned Heroes</div>"
+            f"<div class='cc-pick-grid'>{''.join(slots)}</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+
 def render_hero_selector_panel(title, subtitle, key_prefix, options, max_selections):
     st.markdown(
         (
@@ -959,7 +992,7 @@ for _, row in meta_df.nlargest(5, "Contest Rate (%)").iterrows():
 handle_admin_actions(hero_list, load_lane_database())
 
 st.markdown("## Draft Command Center")
-draft_col, enemy_col = st.columns(2)
+draft_col, enemy_col, banned_col = st.columns(3)
 with draft_col:
     selected_team = render_hero_selector_panel(
         "Your Draft",
@@ -976,20 +1009,35 @@ with enemy_col:
         hero_list,
         5,
     )
+with banned_col:
+    selected_bans = render_hero_selector_panel(
+        "Banned Heroes",
+        "Heroes removed from draft consideration.",
+        "banned",
+        hero_list,
+        10,
+    )
 
 overlap = sorted(set(selected_team).intersection(selected_enemy))
 if overlap:
     st.error("A hero cannot be locked on both sides. Remove duplicates: " + ", ".join(overlap))
     st.stop()
 
+banned_conflicts = sorted((set(selected_team) | set(selected_enemy)).intersection(selected_bans))
+if banned_conflicts:
+    st.error("A hero cannot be both banned and locked in draft. Remove duplicates: " + ", ".join(banned_conflicts))
+    st.stop()
+
 team_df = build_selection_df(meta_df, selected_team)
 enemy_df = build_selection_df(meta_df, selected_enemy)
 
-team_display_col, enemy_display_col = st.columns(2)
+team_display_col, enemy_display_col, banned_display_col = st.columns(3)
 with team_display_col:
     render_pick_panel("Your Locked Heroes", team_df, "friendly")
 with enemy_display_col:
     render_pick_panel("Enemy Locked Heroes", enemy_df, "enemy")
+with banned_display_col:
+    render_banned_panel(selected_bans)
 
 command_tab, breakdown_tab, explorer_tab = st.tabs([
     "Command Board",
@@ -999,8 +1047,8 @@ command_tab, breakdown_tab, explorer_tab = st.tabs([
 
 if selected_team:
     team_analysis = analyze_team(team_df)
-    next_pick_recommendations = recommend_next_picks(meta_df, team_df, enemy_df, limit=5)
-    ban_recommendations = recommend_bans(meta_df, team_df, enemy_df, limit=5)
+    next_pick_recommendations = recommend_next_picks(meta_df, team_df, enemy_df, selected_bans, limit=5)
+    ban_recommendations = recommend_bans(meta_df, team_df, enemy_df, selected_bans, limit=5)
     render_score_cards(team_analysis, len(selected_team))
 
     with command_tab:

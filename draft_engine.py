@@ -139,6 +139,21 @@ def _lane_options(row):
     return lanes
 
 
+def get_unavailable_heroes(team_df, enemy_df=None, banned_heroes=None):
+    unavailable_heroes = set()
+
+    if team_df is not None and not team_df.empty:
+        unavailable_heroes.update(team_df["Hero"].dropna().astype(str).tolist())
+
+    if enemy_df is not None and not enemy_df.empty:
+        unavailable_heroes.update(enemy_df["Hero"].dropna().astype(str).tolist())
+
+    if banned_heroes:
+        unavailable_heroes.update(str(hero_name).strip() for hero_name in banned_heroes if str(hero_name).strip())
+
+    return unavailable_heroes
+
+
 def _hero_list_text(hero_names, limit=2):
     if not hero_names:
         return ""
@@ -600,11 +615,11 @@ def analyze_team(team_df):
     }
 
 
-def recommend_next_picks(meta_df, team_df, enemy_df=None, limit=5):
+def recommend_next_picks(meta_df, team_df, enemy_df=None, banned_heroes=None, limit=5):
     enemy_df = enemy_df if enemy_df is not None else meta_df.iloc[0:0]
     baseline = analyze_team(team_df)
     enemy_profile = _build_composition_profile(enemy_df)
-    locked_heroes = set(team_df["Hero"].tolist()) | set(enemy_df["Hero"].tolist())
+    locked_heroes = get_unavailable_heroes(team_df, enemy_df, banned_heroes)
     recommendations = []
 
     for _, row in meta_df.iterrows():
@@ -675,12 +690,12 @@ def recommend_next_picks(meta_df, team_df, enemy_df=None, limit=5):
     return recommendations[:limit]
 
 
-def recommend_bans(meta_df, team_df, enemy_df=None, limit=5):
+def recommend_bans(meta_df, team_df, enemy_df=None, banned_heroes=None, limit=5):
     enemy_df = enemy_df if enemy_df is not None else meta_df.iloc[0:0]
     team_analysis = analyze_team(team_df)
     team_profile = _build_composition_profile(team_df)
     enemy_profile = _build_composition_profile(enemy_df)
-    locked_heroes = set(team_df["Hero"].tolist()) | set(enemy_df["Hero"].tolist())
+    locked_heroes = get_unavailable_heroes(team_df, enemy_df, banned_heroes)
     recommendations = []
 
     for _, row in meta_df.iterrows():
