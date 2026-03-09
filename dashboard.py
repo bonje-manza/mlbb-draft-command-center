@@ -1054,6 +1054,29 @@ def render_issue(issue):
         st.info(message)
 
 
+def get_draft_hard_blockers(team_df):
+    if team_df.empty:
+        return []
+
+    blockers = []
+    team_analysis = analyze_team(team_df)
+    assigned_lanes = set(team_analysis["lane_assignment"].values())
+    assigned_lane_count = len(assigned_lanes)
+    remaining_slots = max(0, 5 - len(team_df))
+    max_reachable_lanes = assigned_lane_count + remaining_slots
+
+    if max_reachable_lanes < len(REQUIRED_LANES):
+        uncovered_lanes = [lane_name for lane_name in REQUIRED_LANES if lane_name not in assigned_lanes]
+        blockers.append(
+            "Lane assignment is no longer viable for a complete 5-role draft. "
+            f"Current assignable lanes: {assigned_lane_count}/5, picks left: {remaining_slots}, "
+            f"best-case final lanes: {max_reachable_lanes}/5. "
+            f"Still uncovered: {', '.join(uncovered_lanes)}."
+        )
+
+    return blockers
+
+
 def format_recommendations(recommendations, score_column):
     if not recommendations:
         return pd.DataFrame()
@@ -1459,6 +1482,12 @@ if banned_conflicts:
 
 team_df = build_selection_df(meta_df, selected_team)
 enemy_df = build_selection_df(meta_df, selected_enemy)
+draft_hard_blockers = get_draft_hard_blockers(team_df)
+
+if draft_hard_blockers:
+    st.error("Draft validation blocked: adjust your locked heroes before continuing.")
+    for blocker_message in draft_hard_blockers:
+        st.warning(blocker_message)
 
 team_display_col, enemy_display_col, banned_display_col = st.columns(3)
 with team_display_col:
@@ -1474,7 +1503,7 @@ command_tab, breakdown_tab, explorer_tab = st.tabs([
     "Meta Explorer",
 ])
 
-if selected_team:
+if selected_team and not draft_hard_blockers:
     team_analysis = analyze_team(team_df)
     next_pick_recommendations = recommend_next_picks(meta_df, team_df, enemy_df, selected_bans, limit=5)
     ban_recommendations = recommend_bans(meta_df, team_df, enemy_df, selected_bans, limit=5)
@@ -1548,9 +1577,15 @@ if selected_team:
             )
 else:
     with command_tab:
-        st.info("Start by locking your own heroes to generate draft analysis, next-pick suggestions, and ban targets.")
+        if draft_hard_blockers:
+            st.error("Draft is currently blocked by lane viability checks. Update your locked heroes to continue.")
+        else:
+            st.info("Start by locking your own heroes to generate draft analysis, next-pick suggestions, and ban targets.")
     with breakdown_tab:
-        st.info("Detailed breakdown appears once you have at least one hero locked.")
+        if draft_hard_blockers:
+            st.info("Detailed breakdown is disabled until your draft passes hard validation.")
+        else:
+            st.info("Detailed breakdown appears once you have at least one hero locked.")
 
 with explorer_tab:
     filtered_df = meta_df.copy()
