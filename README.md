@@ -58,6 +58,7 @@ streamlit run dashboard.py
 ## 🎯 Key Features
 - **Structured Draft Analysis:** Lane coverage, frontline, damage mix, scaling, and overall draft score.
 - **Recommendation Engine:** Best next picks and high-priority ban suggestions based on current locks.
+- **Explainable Recommendations:** Pick and ban suggestions now show score drivers and projected team impact instead of opaque ranking alone.
 - **Threat Level Visualization:** Progress bars for Contest Rates and color-coded Win Rate metrics.
 - **Admin Sync Controls:** A built-in Admin panel for synchronizing the approved API source and managing lane mappings.
 - **Hidden OP Finder:** Identify low-visibility heroes that are currently dominating the high-rank win rates.

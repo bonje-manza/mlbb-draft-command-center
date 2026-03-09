@@ -104,6 +104,60 @@ def _normalize_power_score(value):
     return max(0, min(100, round(normalized)))
 
 
+def _category_score_map(analysis):
+    return {category["label"]: category["score"] for category in analysis.get("categories", [])}
+
+
+def _build_projected_changes(baseline, projected):
+    baseline_scores = _category_score_map(baseline)
+    projected_scores = _category_score_map(projected)
+    changes = []
+
+    for label_name, projected_score in projected_scores.items():
+        baseline_score = baseline_scores.get(label_name, 0)
+        delta_value = projected_score - baseline_score
+        if delta_value == 0:
+            continue
+
+        direction = "improves" if delta_value > 0 else "reduces"
+        changes.append({
+            "label": label_name,
+            "delta": delta_value,
+            "direction": direction,
+            "detail": f"{label_name} {direction} by {abs(delta_value)} points.",
+        })
+
+    changes.sort(key=lambda item: abs(item["delta"]), reverse=True)
+    return changes
+
+
+def _format_score_drivers(score_drivers):
+    ordered_drivers = sorted(score_drivers.items(), key=lambda item: item[1], reverse=True)
+    return [
+        {
+            "label": label_name,
+            "value": round(driver_value, 1),
+            "detail": f"{label_name} contributed {driver_value:+.1f}.",
+        }
+        for label_name, driver_value in ordered_drivers
+        if driver_value > 0
+    ]
+
+
+def _summarize_pick_recommendation(hero_name, reasons, projected_changes):
+    lead_reason = reasons[0] if reasons else "High raw meta power"
+    top_change = projected_changes[0]["detail"] if projected_changes else "Projected team structure stays stable."
+    return f"{hero_name} is recommended because it {lead_reason.lower()}. {top_change}"
+
+
+def _summarize_ban_recommendation(hero_name, reasons, score_drivers):
+    lead_reason = reasons[0] if reasons else "High contest and power score"
+    top_driver = _format_score_drivers(score_drivers)
+    if top_driver:
+        return f"{hero_name} is a ban target because of {lead_reason.lower()}. Strongest threat driver: {top_driver[0]['detail']}"
+    return f"{hero_name} is a ban target because of {lead_reason.lower()}."
+
+
 def analyze_team(team_df):
     if team_df.empty:
         return {
@@ -283,37 +337,43 @@ def recommend_next_picks(meta_df, team_df, enemy_df=None, limit=5):
         projected = analyze_team(projected_df)
         lane_options = _lane_options(row)
         role_name = row["Role"]
-        recommendation_score = (projected["team_score"] - baseline["team_score"]) * 1.8
-        recommendation_score += float(row["True Power Score"]) * 0.9
-        recommendation_score += float(row["Contest Rate (%)"]) * 0.15
+        score_drivers = {
+            "Projected team upgrade": (projected["team_score"] - baseline["team_score"]) * 1.8,
+            "Meta power": float(row["True Power Score"]) * 0.9,
+            "Contest leverage": float(row["Contest Rate (%)"]) * 0.15,
+        }
         reasons = []
 
         if any(lane_name in baseline["missing_lanes"] for lane_name in lane_options):
-            recommendation_score += 18
+            score_drivers["Lane coverage"] = 18
             reasons.append("Fills an uncovered lane")
 
         if baseline["frontline_count"] == 0 and role_name in FRONTLINE_ROLES:
-            recommendation_score += 16
+            score_drivers["Frontline fix"] = 16
             reasons.append("Adds frontline stability")
 
         if baseline["magic_sources"] == 0 and is_magic_source(hero_name, role_name):
-            recommendation_score += 14
+            score_drivers["Damage rebalance"] = 14
             reasons.append("Restores magic damage")
 
         if baseline["marksman_count"] == 0 and is_scaling_source(hero_name, role_name, lane_options):
-            recommendation_score += 12
+            score_drivers["Scaling insurance"] = 12
             reasons.append("Improves late-game scaling")
 
         if len(projected["lane_assignment"]) > len(baseline["lane_assignment"]):
-            recommendation_score += 10
+            score_drivers["Lane flexibility"] = 10
             reasons.append("Improves lane assignment flexibility")
 
         if len(lane_options) > 1:
-            recommendation_score += 5
+            score_drivers["Flex value"] = 5
             reasons.append("Can flex between lanes")
 
         if not reasons:
-            reasons.append("High raw meta power")
+            reasons.append("leans on high raw meta power")
+
+        recommendation_score = sum(score_drivers.values())
+        projected_changes = _build_projected_changes(baseline, projected)
+        score_breakdown = _format_score_drivers(score_drivers)
 
         recommendations.append({
             "Hero": hero_name,
@@ -322,7 +382,10 @@ def recommend_next_picks(meta_df, team_df, enemy_df=None, limit=5):
             "True Power Score": round(float(row["True Power Score"]), 1),
             "Contest Rate (%)": round(float(row["Contest Rate (%)"]), 2),
             "Recommendation Score": round(recommendation_score, 1),
-            "Why": reasons[:3],
+            "Why": [reason.capitalize() for reason in reasons[:3]],
+            "Summary": _summarize_pick_recommendation(hero_name, reasons, projected_changes),
+            "Score Drivers": score_breakdown[:4],
+            "Projected Changes": projected_changes[:4],
         })
 
     recommendations.sort(key=lambda item: item["Recommendation Score"], reverse=True)
@@ -342,27 +405,33 @@ def recommend_bans(meta_df, team_df, enemy_df=None, limit=5):
 
         role_name = row["Role"]
         lane_options = _lane_options(row)
-        threat_score = float(row["True Power Score"]) * 1.1 + float(row["Contest Rate (%)"]) * 0.65
+        score_drivers = {
+            "Meta power": float(row["True Power Score"]) * 1.1,
+            "Contest pressure": float(row["Contest Rate (%)"]) * 0.65,
+        }
         reasons = []
 
         if str(row["Meta Tier"]).startswith("S-Tier"):
-            threat_score += 12
-            reasons.append("S-tier meta pressure")
+            score_drivers["Tier pressure"] = 12
+            reasons.append("s-tier meta pressure")
 
         if len(lane_options) > 1:
-            threat_score += 6
-            reasons.append("Flexible draft threat")
+            score_drivers["Flex threat"] = 6
+            reasons.append("flexible draft threat")
 
         if team_analysis["frontline_count"] == 0 and role_name in {"Assassin", "Fighter"} and "Jungler" in lane_options:
-            threat_score += 8
-            reasons.append("Punishes a fragile backline")
+            score_drivers["Fragile draft punish"] = 8
+            reasons.append("punishes a fragile backline")
 
         if team_analysis["magic_sources"] == 0 and is_magic_source(hero_name, role_name):
-            threat_score += 4
-            reasons.append("Adds hard-to-match mixed damage")
+            score_drivers["Mixed damage threat"] = 4
+            reasons.append("adds hard-to-match mixed damage")
 
         if not reasons:
-            reasons.append("High contest and power score")
+            reasons.append("leans on high contest and power score")
+
+        threat_score = sum(score_drivers.values())
+        score_breakdown = _format_score_drivers(score_drivers)
 
         recommendations.append({
             "Hero": hero_name,
@@ -371,7 +440,10 @@ def recommend_bans(meta_df, team_df, enemy_df=None, limit=5):
             "True Power Score": round(float(row["True Power Score"]), 1),
             "Contest Rate (%)": round(float(row["Contest Rate (%)"]), 2),
             "Threat Score": round(threat_score, 1),
-            "Why": reasons[:3],
+            "Why": [reason.capitalize() for reason in reasons[:3]],
+            "Summary": _summarize_ban_recommendation(hero_name, reasons, score_drivers),
+            "Score Drivers": score_breakdown[:4],
+            "Projected Changes": [],
         })
 
     recommendations.sort(key=lambda item: item["Threat Score"], reverse=True)

@@ -349,6 +349,60 @@ def inject_app_styles():
             line-height: 1.45;
         }
 
+        .cc-explain-stack {
+            display: grid;
+            gap: 0.75rem;
+            margin-top: 0.8rem;
+        }
+
+        .cc-explain-card {
+            border-radius: 16px;
+            border: 1px solid var(--cc-border);
+            background: rgba(255, 255, 255, 0.62);
+            padding: 0.9rem;
+        }
+
+        .cc-explain-heading {
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--cc-muted);
+            margin-bottom: 0.35rem;
+        }
+
+        .cc-explain-body {
+            color: var(--cc-ink);
+            font-size: 0.88rem;
+            line-height: 1.45;
+        }
+
+        .cc-explain-list {
+            display: grid;
+            gap: 0.45rem;
+            margin-top: 0.6rem;
+        }
+
+        .cc-explain-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.5rem 0.65rem;
+            border-radius: 12px;
+            background: rgba(23, 33, 31, 0.04);
+        }
+
+        .cc-explain-item-label {
+            color: var(--cc-ink);
+            font-size: 0.84rem;
+        }
+
+        .cc-explain-item-value {
+            color: var(--cc-muted);
+            font-size: 0.8rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
         .cc-callout {
             border-radius: 18px;
             border: 1px solid var(--cc-border);
@@ -544,6 +598,12 @@ def format_recommendations(recommendations, score_column):
 
     formatted_df = pd.DataFrame(recommendations).copy()
     formatted_df["Why"] = formatted_df["Why"].apply(lambda reasons: "; ".join(reasons))
+    formatted_df["Top Drivers"] = formatted_df["Score Drivers"].apply(
+        lambda drivers: "; ".join(f"{driver['label']} {driver['value']:+.1f}" for driver in drivers[:3])
+    )
+    formatted_df["Projected Impact"] = formatted_df["Projected Changes"].apply(
+        lambda changes: "; ".join(f"{change['label']} {change['delta']:+d}" for change in changes[:3]) if changes else "Threat-only evaluation"
+    )
     ordered_columns = [
         "Hero",
         "Role",
@@ -552,6 +612,8 @@ def format_recommendations(recommendations, score_column):
         "True Power Score",
         "Contest Rate (%)",
         "Why",
+        "Top Drivers",
+        "Projected Impact",
     ]
     return formatted_df[ordered_columns]
 
@@ -669,6 +731,12 @@ def render_priority_cards(title, subtitle, recommendations, score_column, accent
 
     card_markup = []
     for index, recommendation in enumerate(recommendations[:3], start=1):
+        score_driver_text = " | ".join(
+            f"{driver['label']} {driver['value']:+.1f}" for driver in recommendation.get("Score Drivers", [])[:3]
+        )
+        projected_change_text = " | ".join(
+            f"{change['label']} {change['delta']:+d}" for change in recommendation.get("Projected Changes", [])[:3]
+        )
         card_markup.append(
             "<div class='cc-priority-card'>"
             "<div class='cc-priority-topline'>"
@@ -680,6 +748,9 @@ def render_priority_cards(title, subtitle, recommendations, score_column, accent
             f"<span class='cc-chip'>Power {recommendation['True Power Score']:.1f}</span>"
             f"<span class='cc-chip'>Contest {recommendation['Contest Rate (%)']:.2f}%</span>"
             "</div>"
+            f"<div class='cc-priority-why'>{recommendation.get('Summary', '')}</div>"
+            f"<div class='cc-priority-why'><strong>Score drivers:</strong> {score_driver_text or 'Base meta profile only'}</div>"
+            f"<div class='cc-priority-why'><strong>Projected impact:</strong> {projected_change_text or 'No structural change projected'}</div>"
             f"<div class='cc-priority-why'>{'; '.join(recommendation['Why'])}</div>"
             "</div>"
         )
@@ -687,20 +758,73 @@ def render_priority_cards(title, subtitle, recommendations, score_column, accent
     st.markdown(f"<div class='cc-priority-grid'>{''.join(card_markup)}</div>", unsafe_allow_html=True)
 
 
+def render_explainability_panel(title, recommendation, score_column):
+    if not recommendation:
+        st.info("No recommendation available to explain yet.")
+        return
+
+    score_driver_markup = "".join(
+        (
+            "<div class='cc-explain-item'>"
+            f"<div class='cc-explain-item-label'>{driver['label']}</div>"
+            f"<div class='cc-explain-item-value'>{driver['value']:+.1f}</div>"
+            "</div>"
+        )
+        for driver in recommendation.get("Score Drivers", [])[:4]
+    )
+    projected_change_markup = "".join(
+        (
+            "<div class='cc-explain-item'>"
+            f"<div class='cc-explain-item-label'>{change['label']}</div>"
+            f"<div class='cc-explain-item-value'>{change['delta']:+d}</div>"
+            "</div>"
+        )
+        for change in recommendation.get("Projected Changes", [])[:4]
+    )
+    reason_text = "; ".join(recommendation.get("Why", []))
+
+    st.markdown(
+        (
+            "<div class='cc-panel'>"
+            f"<div class='cc-panel-title'>{title}</div>"
+            f"<div class='cc-panel-heading'>{recommendation['Hero']} ({recommendation[score_column]:.1f})</div>"
+            f"<div class='cc-score-detail'>{recommendation.get('Summary', '')}</div>"
+            "<div class='cc-explain-stack'>"
+            "<div class='cc-explain-card'>"
+            "<div class='cc-explain-heading'>Primary Reasons</div>"
+            f"<div class='cc-explain-body'>{reason_text or 'No additional reasons recorded.'}</div>"
+            "</div>"
+            "<div class='cc-explain-card'>"
+            "<div class='cc-explain-heading'>Score Drivers</div>"
+            f"<div class='cc-explain-list'>{score_driver_markup or '<div class=\'cc-explain-body\'>No score drivers recorded.</div>'}</div>"
+            "</div>"
+            "<div class='cc-explain-card'>"
+            "<div class='cc-explain-heading'>Projected Team Impact</div>"
+            f"<div class='cc-explain-list'>{projected_change_markup or '<div class=\'cc-explain-body\'>This recommendation is driven by threat evaluation rather than a projected team change.</div>'}</div>"
+            "</div>"
+            "</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+
 def render_quick_calls(team_analysis, next_pick_recommendations, ban_recommendations):
     priority_pick = next_pick_recommendations[0]["Hero"] if next_pick_recommendations else "No pick available"
     priority_ban = ban_recommendations[0]["Hero"] if ban_recommendations else "No ban target available"
     open_lanes = ", ".join(team_analysis["missing_lanes"]) if team_analysis["missing_lanes"] else "No open lanes"
+    pick_summary = next_pick_recommendations[0].get("Summary", "") if next_pick_recommendations else ""
+    ban_summary = ban_recommendations[0].get("Summary", "") if ban_recommendations else ""
 
     st.markdown(
         (
             "<div class='cc-callout'>"
             f"<strong>Pick now: {priority_pick}</strong>"
-            f"Best immediate value based on your current structural gaps and meta power. Open lanes: {open_lanes}."
+            f"{pick_summary or 'Best immediate value based on your current structural gaps and meta power.'} Open lanes: {open_lanes}."
             "</div>"
             "<div class='cc-callout'>"
             f"<strong>Ban now: {priority_ban}</strong>"
-            "Highest-pressure removal based on meta threat, flexibility, and how exposed your current draft is."
+            f"{ban_summary or 'Highest-pressure removal based on meta threat, flexibility, and how exposed your current draft is.'}"
             "</div>"
         ),
         unsafe_allow_html=True,
@@ -910,7 +1034,7 @@ if selected_team:
             )
 
     with breakdown_tab:
-        risk_col, pick_table_col, ban_table_col = st.columns([0.95, 1.15, 1.15])
+        risk_col, pick_table_col, ban_table_col, explain_col = st.columns([0.85, 1.05, 1.05, 1.05])
         with risk_col:
             st.markdown("### Draft Risks")
             for issue in team_analysis["issues"]:
@@ -933,6 +1057,17 @@ if selected_team:
                 format_recommendations(ban_recommendations, "Threat Score"),
                 width="stretch",
                 hide_index=True,
+            )
+        with explain_col:
+            render_explainability_panel(
+                "Pick Explanation",
+                next_pick_recommendations[0] if next_pick_recommendations else None,
+                "Recommendation Score",
+            )
+            render_explainability_panel(
+                "Ban Explanation",
+                ban_recommendations[0] if ban_recommendations else None,
+                "Threat Score",
             )
 else:
     with command_tab:
