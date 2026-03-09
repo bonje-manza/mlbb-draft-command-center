@@ -1316,6 +1316,61 @@ def render_quick_calls(team_analysis, next_pick_recommendations, ban_recommendat
     )
 
 
+def render_best_next_action(team_analysis, next_pick_recommendations, ban_recommendations):
+    if not next_pick_recommendations and not ban_recommendations:
+        st.info("No immediate action available.")
+        return
+
+    has_critical_issue = any(issue["severity"] == "error" for issue in team_analysis.get("issues", []))
+    should_force_pick = bool(team_analysis.get("missing_lanes")) or team_analysis.get("frontline_count", 0) == 0
+
+    selected_action = "pick"
+    if not next_pick_recommendations:
+        selected_action = "ban"
+    elif not ban_recommendations:
+        selected_action = "pick"
+    elif not has_critical_issue and not should_force_pick:
+        pick_score = next_pick_recommendations[0]["Recommendation Score"]
+        ban_score = ban_recommendations[0]["Threat Score"]
+        if ban_score > (pick_score * 1.1):
+            selected_action = "ban"
+
+    if selected_action == "pick":
+        hero_name = next_pick_recommendations[0]["Hero"]
+        st.markdown(
+            (
+                "<div class='cc-callout'>"
+                f"<strong>Best Next Action: PICK {hero_name}</strong>"
+                "Use this as your immediate lock to maximize current draft value."
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
+        if st.button(f"Apply Pick: {hero_name}", key="apply_best_pick"):
+            locked_team = list(st.session_state.get("friendly_draft_selector", []))
+            if hero_name not in locked_team and len(locked_team) < 5:
+                locked_team.append(hero_name)
+                st.session_state["friendly_draft_selector"] = locked_team
+                st.rerun()
+    else:
+        hero_name = ban_recommendations[0]["Hero"]
+        st.markdown(
+            (
+                "<div class='cc-callout'>"
+                f"<strong>Best Next Action: BAN {hero_name}</strong>"
+                "Remove this threat now to reduce enemy draft pressure."
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
+        if st.button(f"Apply Ban: {hero_name}", key="apply_best_ban"):
+            banned_heroes = list(st.session_state.get("banned_draft_selector", []))
+            if hero_name not in banned_heroes and len(banned_heroes) < 10:
+                banned_heroes.append(hero_name)
+                st.session_state["banned_draft_selector"] = banned_heroes
+                st.rerun()
+
+
 def handle_admin_actions(hero_list, lane_database):
     admin_password = os.getenv(ADMIN_PASSWORD_ENV)
 
@@ -1437,6 +1492,22 @@ selected_lane = st.sidebar.selectbox("Filter by Lane", available_lanes)
 search_query = st.sidebar.text_input("Quick Search Hero", placeholder="Search by name...").strip()
 
 st.sidebar.divider()
+st.sidebar.markdown("### Ranked Optimization")
+pick_order_mode = st.sidebar.selectbox(
+    "Pick-Order Mode",
+    ["Balanced", "Early Priority", "Mid Draft", "Last Pick"],
+    index=0,
+)
+restrict_to_hero_pool = st.sidebar.checkbox("Restrict picks to my hero pool", value=False)
+selected_hero_pool = st.sidebar.multiselect(
+    "My Hero Pool",
+    options=hero_list,
+    default=[],
+    max_selections=40,
+)
+effective_hero_pool = selected_hero_pool if (restrict_to_hero_pool and selected_hero_pool) else None
+
+st.sidebar.divider()
 st.sidebar.markdown("### Most Contested Heroes")
 for _, row in meta_df.nlargest(5, "Contest Rate (%)").iterrows():
     st.sidebar.markdown(f"**{row['Hero']}** ({row['Contest Rate (%)']:.2f}%)")
@@ -1505,14 +1576,34 @@ command_tab, breakdown_tab, explorer_tab = st.tabs([
 
 if selected_team and not draft_hard_blockers:
     team_analysis = analyze_team(team_df)
-    next_pick_recommendations = recommend_next_picks(meta_df, team_df, enemy_df, selected_bans, limit=5)
-    ban_recommendations = recommend_bans(meta_df, team_df, enemy_df, selected_bans, limit=5)
+    next_pick_recommendations = recommend_next_picks(
+        meta_df,
+        team_df,
+        enemy_df,
+        selected_bans,
+        limit=5,
+        pick_order_mode=pick_order_mode,
+        hero_pool=effective_hero_pool,
+    )
+    ban_recommendations = recommend_bans(
+        meta_df,
+        team_df,
+        enemy_df,
+        selected_bans,
+        limit=5,
+        pick_order_mode=pick_order_mode,
+    )
+
+    if restrict_to_hero_pool and not selected_hero_pool:
+        st.warning("Hero pool lock is enabled but your hero pool is empty. Add heroes in the sidebar to unlock pick recommendations.")
+
     render_score_cards(team_analysis, len(selected_team))
 
     with command_tab:
         quick_col, score_col, lane_col = st.columns([1.1, 1.15, 0.95])
         with quick_col:
             render_quick_calls(team_analysis, next_pick_recommendations, ban_recommendations)
+            render_best_next_action(team_analysis, next_pick_recommendations, ban_recommendations)
         with score_col:
             render_structure_scores(team_analysis)
         with lane_col:
