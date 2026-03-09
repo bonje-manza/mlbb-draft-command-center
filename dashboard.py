@@ -1054,6 +1054,53 @@ def render_issue(issue):
         st.info(message)
 
 
+def get_next_pick_recommendations(meta_df, team_df, enemy_df, selected_bans, pick_order_mode, effective_hero_pool):
+    try:
+        return recommend_next_picks(
+            meta_df,
+            team_df,
+            enemy_df,
+            selected_bans,
+            limit=5,
+            pick_order_mode=pick_order_mode,
+            hero_pool=effective_hero_pool,
+        )
+    except TypeError:
+        fallback_recommendations = recommend_next_picks(
+            meta_df,
+            team_df,
+            enemy_df,
+            selected_bans,
+            limit=5,
+        )
+        if effective_hero_pool:
+            allowed_heroes = {str(hero_name).strip() for hero_name in effective_hero_pool if str(hero_name).strip()}
+            fallback_recommendations = [
+                recommendation for recommendation in fallback_recommendations if recommendation.get("Hero") in allowed_heroes
+            ]
+        return fallback_recommendations
+
+
+def get_ban_recommendations(meta_df, team_df, enemy_df, selected_bans, pick_order_mode):
+    try:
+        return recommend_bans(
+            meta_df,
+            team_df,
+            enemy_df,
+            selected_bans,
+            limit=5,
+            pick_order_mode=pick_order_mode,
+        )
+    except TypeError:
+        return recommend_bans(
+            meta_df,
+            team_df,
+            enemy_df,
+            selected_bans,
+            limit=5,
+        )
+
+
 def get_draft_hard_blockers(team_df):
     if team_df.empty:
         return []
@@ -1576,22 +1623,20 @@ command_tab, breakdown_tab, explorer_tab = st.tabs([
 
 if selected_team and not draft_hard_blockers:
     team_analysis = analyze_team(team_df)
-    next_pick_recommendations = recommend_next_picks(
+    next_pick_recommendations = get_next_pick_recommendations(
         meta_df,
         team_df,
         enemy_df,
         selected_bans,
-        limit=5,
-        pick_order_mode=pick_order_mode,
-        hero_pool=effective_hero_pool,
+        pick_order_mode,
+        effective_hero_pool,
     )
-    ban_recommendations = recommend_bans(
+    ban_recommendations = get_ban_recommendations(
         meta_df,
         team_df,
         enemy_df,
         selected_bans,
-        limit=5,
-        pick_order_mode=pick_order_mode,
+        pick_order_mode,
     )
 
     if restrict_to_hero_pool and not selected_hero_pool:
