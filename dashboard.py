@@ -11,7 +11,7 @@ from meta_scout import API_ENDPOINT_ENV, REQUIRED_API_TOKEN_ENV, analyze_meta, g
 DATA_FILE = "current_mlbb_meta_api.csv"
 ROLE_FILE = "hero_roles.json"
 LANE_FILE = "hero_lanes.json"
-ADMIN_PASSWORD_ENV = "Glory2026"
+ADMIN_PASSWORD_ENV = "MLBB_ADMIN_PASSWORD"
 REQUIRED_COLUMNS = {
     "True Overall Rank",
     "Hero",
@@ -887,14 +887,14 @@ def handle_admin_actions(hero_list, lane_database):
         st.markdown("### Data Synchronization")
 
         approved_endpoint = os.getenv(API_ENDPOINT_ENV)
-        sync_ready = bool(approved_endpoint and os.getenv(REQUIRED_API_TOKEN_ENV))
+        sync_ready = bool(approved_endpoint)
         if sync_ready:
             st.caption(f"Approved endpoint: {approved_endpoint}")
             if st.button("Sync Approved Data Source"):
                 with st.spinner("Synchronizing with approved source..."):
                     raw_data = get_mlbb_meta_api()
                     if raw_data.empty:
-                        st.error("Synchronization failed. Verify the approved endpoint and API token.")
+                        st.error("Synchronization failed. Check the endpoint or authorization if required.")
                     else:
                         analyzed_meta = analyze_meta(raw_data)
                         analyzed_meta.to_csv(DATA_FILE, index=False)
@@ -903,7 +903,7 @@ def handle_admin_actions(hero_list, lane_database):
                         st.rerun()
         else:
             st.warning(
-                f"Synchronization is disabled until both {API_ENDPOINT_ENV} and {REQUIRED_API_TOKEN_ENV} are configured."
+                f"Synchronization is disabled until {API_ENDPOINT_ENV} is configured."
             )
 
         st.divider()
