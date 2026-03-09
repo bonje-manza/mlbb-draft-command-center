@@ -26,20 +26,19 @@ def _resolve_endpoint(endpoint=None):
 
 def _build_headers(authorization_token=None):
     resolved_token = authorization_token or os.getenv(REQUIRED_API_TOKEN_ENV)
-    if not resolved_token:
-        raise ValueError(
-            f"Missing API authorization token. Set the {REQUIRED_API_TOKEN_ENV} environment variable."
-        )
-
-    return {
+    headers = {
         "accept": "application/json, text/plain, */*",
         "accept-language": "en-US,en;q=0.9",
-        "authorization": resolved_token,
         "content-type": "application/json;charset=UTF-8",
         "origin": "https://www.mobilelegends.com",
         "referer": "https://www.mobilelegends.com/",
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
     }
+
+    if resolved_token:
+        headers["authorization"] = resolved_token
+
+    return headers
 
 
 def get_mlbb_meta_api(endpoint=None, authorization_token=None):
@@ -48,6 +47,10 @@ def get_mlbb_meta_api(endpoint=None, authorization_token=None):
     try:
         resolved_endpoint = _resolve_endpoint(endpoint)
         headers = _build_headers(authorization_token)
+        if "authorization" not in headers:
+            print(
+                f"No API token detected ({REQUIRED_API_TOKEN_ENV} not set). Attempting unauthenticated request..."
+            )
     except ValueError as exc:
         print(f"Configuration Error: {exc}")
         return pd.DataFrame()
@@ -72,6 +75,15 @@ def get_mlbb_meta_api(endpoint=None, authorization_token=None):
 
     try:
         response = requests.post(resolved_endpoint, headers=headers, json=json_data, timeout=30)
+        if response.status_code in {401, 403}:
+            print(
+                "Authorization failed. This endpoint currently requires a valid authorization header from an authenticated browser session."
+            )
+            print(
+                f"Set {REQUIRED_API_TOKEN_ENV} with the intercepted request token and try again."
+            )
+            return pd.DataFrame()
+
         response.raise_for_status() 
         
         data = response.json()

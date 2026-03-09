@@ -40,6 +40,8 @@ $env:MLBB_META_API_URL="https://api.gms.moontontech.com/api/gms/source/2669606/2
 $env:MLBB_API_AUTHORIZATION="your-api-authorization-token"
 ```
 
+`MLBB_API_AUTHORIZATION` is optional at startup: the scout first attempts an unauthenticated request. If the API responds with `401/403`, provide the intercepted authorization value from your authenticated browser request.
+
 If these values are not configured, the dashboard still works in read-only mode against the local CSV, but admin sync is disabled.
 
 ### Step 1: Execute the Data Infiltration
