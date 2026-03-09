@@ -1,21 +1,56 @@
-import requests
-import pandas as pd
+import os
+from urllib.parse import urlparse
 
-def get_mlbb_meta_api(dynamic_url=None):
+import pandas as pd
+import requests
+
+DEFAULT_ENDPOINT = "https://api.gms.moontontech.com/api/gms/source/2669606/2756569"
+APPROVED_HOSTS = {"api.gms.moontontech.com", "www.mobilelegends.com", "mobilelegends.com"}
+REQUIRED_API_TOKEN_ENV = "MLBB_API_AUTHORIZATION"
+API_ENDPOINT_ENV = "MLBB_META_API_URL"
+
+
+def _resolve_endpoint(endpoint=None):
+    resolved_endpoint = endpoint or os.getenv(API_ENDPOINT_ENV, DEFAULT_ENDPOINT)
+    parsed_endpoint = urlparse(resolved_endpoint)
+
+    if parsed_endpoint.scheme != "https":
+        raise ValueError("Meta endpoint must use HTTPS.")
+
+    hostname = parsed_endpoint.netloc.lower()
+    if hostname not in APPROVED_HOSTS:
+        raise ValueError("Meta endpoint host is not approved.")
+
+    return resolved_endpoint
+
+
+def _build_headers(authorization_token=None):
+    resolved_token = authorization_token or os.getenv(REQUIRED_API_TOKEN_ENV)
+    if not resolved_token:
+        raise ValueError(
+            f"Missing API authorization token. Set the {REQUIRED_API_TOKEN_ENV} environment variable."
+        )
+
+    return {
+        "accept": "application/json, text/plain, */*",
+        "accept-language": "en-US,en;q=0.9",
+        "authorization": resolved_token,
+        "content-type": "application/json;charset=UTF-8",
+        "origin": "https://www.mobilelegends.com",
+        "referer": "https://www.mobilelegends.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    }
+
+
+def get_mlbb_meta_api(endpoint=None, authorization_token=None):
     print("Initiating data retrieval...")
 
-    # If the dashboard provides a new URL, use it. Otherwise, use the fallback.
-    endpoint = dynamic_url if dynamic_url else 'https://api.gms.moontontech.com/api/gms/source/2669606/2756569'
-
-    headers = {
-        'accept': 'application/json, text/plain, */*',
-        'accept-language': 'en-US,en;q=0.9',
-        'authorization': 'DTQW9B4FuLk0JaVBl1PBK4TWung=',
-        'content-type': 'application/json;charset=UTF-8',
-        'origin': 'https://www.mobilelegends.com',
-        'referer': 'https://www.mobilelegends.com/',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36',
-    }
+    try:
+        resolved_endpoint = _resolve_endpoint(endpoint)
+        headers = _build_headers(authorization_token)
+    except ValueError as exc:
+        print(f"Configuration Error: {exc}")
+        return pd.DataFrame()
 
     json_data = {
         'pageSize': 200,
@@ -36,11 +71,11 @@ def get_mlbb_meta_api(dynamic_url=None):
     }
 
     try:
-        response = requests.post(endpoint, headers=headers, json=json_data)
+        response = requests.post(resolved_endpoint, headers=headers, json=json_data, timeout=30)
         response.raise_for_status() 
         
         data = response.json()
-        print(f"Data successfully retrieved from {endpoint}.")
+        print(f"Data successfully retrieved from {resolved_endpoint}.")
         
         # --- RECURSIVE SEARCH ALGORITHM ---
         lists_found = []
@@ -88,7 +123,17 @@ def get_mlbb_meta_api(dynamic_url=None):
                 "Ban Rate": round(ban_rate, 2)
             })
             
-        return pd.DataFrame(heroes_data)
+        extracted_df = pd.DataFrame(heroes_data)
+        if extracted_df.empty:
+            return extracted_df
+
+        extracted_df['Hero'] = extracted_df['Hero'].astype(str).str.strip()
+        extracted_df = extracted_df[extracted_df['Hero'] != '']
+        extracted_df = extracted_df.drop_duplicates(subset=['Hero'], keep='first')
+        for column_name in ['Win Rate', 'Pick Rate', 'Ban Rate']:
+            extracted_df[column_name] = pd.to_numeric(extracted_df[column_name], errors='coerce').fillna(0.0).round(2)
+
+        return extracted_df.reset_index(drop=True)
 
     except Exception as e:
         print(f"System Error: {e}")
@@ -99,18 +144,31 @@ def analyze_meta(df):
     if df.empty:
         print("No data available for analysis.")
         return df
+
+    required_columns = {'Hero', 'Win Rate', 'Pick Rate', 'Ban Rate'}
+    missing_columns = required_columns.difference(df.columns)
+    if missing_columns:
+        print(f"Missing required columns for analysis: {', '.join(sorted(missing_columns))}")
+        return pd.DataFrame()
         
     print(f"Performing meta-analysis on {len(df)} hero profiles...")
+
+    df = df.copy()
+    df['Hero'] = df['Hero'].astype(str).str.strip()
+    df = df[df['Hero'] != '']
+    df = df.drop_duplicates(subset=['Hero'], keep='first')
+    for column_name in ['Win Rate', 'Pick Rate', 'Ban Rate']:
+        df[column_name] = pd.to_numeric(df[column_name], errors='coerce').fillna(0.0)
     
-    df['Contest Rate (%)'] = df['Ban Rate'] + df['Pick Rate']
-    df['True Match Presence (%)'] = df['Pick Rate'] * 10
+    df['Contest Rate (%)'] = (df['Ban Rate'] + df['Pick Rate']).round(2)
+    df['True Match Presence (%)'] = (df['Pick Rate'] * 10).round(2)
     
     # --- TRUE POWER ALGORITHM V2 ---
     fear_index = (df['Ban Rate'] * 0.6) + (df['Pick Rate'] * 0.25)
     wr_delta = df['Win Rate'] - 50.0
     performance_score = wr_delta * (4.0 + (df['Pick Rate'] * 0.1))
     
-    df['True Power Score'] = round(fear_index + performance_score, 1)
+    df['True Power Score'] = (fear_index + performance_score).round(1)
     
     def assign_tier(row):
         if row['Ban Rate'] >= 35.0 or (row['Contest Rate (%)'] >= 50.0 and row['Win Rate'] >= 50.0):

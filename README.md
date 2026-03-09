@@ -14,8 +14,8 @@ The backend "Scout" performs what we call the **cURL Heist**—intercepting and 
 
 ### 2. `dashboard.py` (The Command Center)
 A high-performance **Streamlit** application that serves as your tactical drafting interface.
-- **Live Team Synergy Analyzer:** As you select heroes, it dynamically checks your squad for critical weaknesses like "No Frontline," "Too Much Magic Damage," or "No Late-Game Carry."
-- **Tactical Filters:** Quickly filter by role (Assassin, Tank, etc.) or search for specific heroes to see their current meta standing.
+- **Draft Command Center:** Lock your team and the enemy team separately, then get a structured draft score, lane plan, risk report, next-pick recommendations, and ban targets.
+- **Tactical Filters:** Quickly filter by role, lane, or hero name to inspect the active meta table.
 - **Performance Optimized:** Utilizes Streamlit caching to ensure fluid interactions even when processing large datasets.
 
 ### 3. Data Assets
@@ -31,6 +31,17 @@ Ensure you have Python 3.9+ installed and all dependencies:
 pip install -r requirements.txt
 ```
 
+### Environment Variables
+The admin sync flow now reads credentials and access controls from environment variables instead of hardcoded values:
+
+```powershell
+$env:MLBB_ADMIN_PASSWORD="your-admin-password"
+$env:MLBB_META_API_URL="https://api.gms.moontontech.com/api/gms/source/2669606/2756569"
+$env:MLBB_API_AUTHORIZATION="your-api-authorization-token"
+```
+
+If these values are not configured, the dashboard still works in read-only mode against the local CSV, but admin sync is disabled.
+
 ### Step 1: Execute the Data Infiltration
 Before running the dashboard, you need to pull the latest meta data:
 ```bash
@@ -45,13 +56,14 @@ streamlit run dashboard.py
 ```
 
 ## 🎯 Key Features
-- **Synergy Validation:** Real-time feedback on team composition balance.
+- **Structured Draft Analysis:** Lane coverage, frontline, damage mix, scaling, and overall draft score.
+- **Recommendation Engine:** Best next picks and high-priority ban suggestions based on current locks.
 - **Threat Level Visualization:** Progress bars for Contest Rates and color-coded Win Rate metrics.
-- **Admin Patching:** A built-in Admin panel to update the API endpoint directly if the data feed shifts.
+- **Admin Sync Controls:** A built-in Admin panel for synchronizing the approved API source and managing lane mappings.
 - **Hidden OP Finder:** Identify low-visibility heroes that are currently dominating the high-rank win rates.
 
 ## 🛡️ Security Note
-The dashboard includes an **Admin Override** panel. The default access passcode is stored in `dashboard.py`. Ensure this is updated or moved to environment variables before deploying to a public server.
+The dashboard no longer ships with embedded admin or API credentials. Keep `MLBB_ADMIN_PASSWORD` and `MLBB_API_AUTHORIZATION` out of source control, and only point `MLBB_META_API_URL` at approved HTTPS endpoints.
 
 ---
 *Disclaimer: This tool is for educational and tactical analysis only. Data is sourced from public API endpoints.*
