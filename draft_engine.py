@@ -40,6 +40,87 @@ MAGIC_DAMAGE_HEROES = {
     "Zhuxin",
 }
 SCALING_HEROES = {"Harith", "Kimmy", "Natan", "Roger"}
+DIVE_HEROES = {
+    "Aamon",
+    "Arlott",
+    "Benedetta",
+    "Chou",
+    "Dyrroth",
+    "Fanny",
+    "Freya",
+    "Gusion",
+    "Guinevere",
+    "Hanzo",
+    "Hayabusa",
+    "Helcurt",
+    "Joy",
+    "Julian",
+    "Karina",
+    "Khaleed",
+    "Lancelot",
+    "Lapu-Lapu",
+    "Ling",
+    "Natalia",
+    "Nolan",
+    "Paquito",
+    "Phoveus",
+    "Saber",
+    "Selena",
+    "Suyou",
+    "Yin",
+    "Yu Zhong",
+}
+PEEL_HEROES = {
+    "Akai",
+    "Atlas",
+    "Baxia",
+    "Carmilla",
+    "Diggie",
+    "Edith",
+    "Estes",
+    "Floryn",
+    "Hylos",
+    "Kaja",
+    "Khufra",
+    "Lolita",
+    "Minotaur",
+    "Rafaela",
+    "Tigreal",
+    "Valir",
+}
+SUSTAIN_DAMAGE_HEROES = {
+    "Claude",
+    "Hanabi",
+    "Ixia",
+    "Karrie",
+    "Melissa",
+    "Moskov",
+    "Natan",
+    "Roger",
+    "Sun",
+    "X.Borg",
+}
+AOE_CONTROL_HEROES = {
+    "Akai",
+    "Atlas",
+    "Aurora",
+    "Cecilion",
+    "Gord",
+    "Khufra",
+    "Lolita",
+    "Lylia",
+    "Minotaur",
+    "Odette",
+    "Pharsa",
+    "Tigreal",
+    "Valir",
+    "Vexana",
+    "Xavier",
+    "Yve",
+    "Zhuxin",
+}
+BACKLINE_ROLES = {"Mage", "Marksman", "Support"}
+SQUISHY_ROLES = {"Assassin", "Mage", "Marksman", "Support"}
 
 
 def is_magic_source(hero_name, role_name):
@@ -56,6 +137,90 @@ def _lane_options(row):
         if lane_name in REQUIRED_LANES and lane_name not in lanes:
             lanes.append(lane_name)
     return lanes
+
+
+def _hero_list_text(hero_names, limit=2):
+    if not hero_names:
+        return ""
+
+    visible_names = hero_names[:limit]
+    if len(visible_names) == 1:
+        return visible_names[0]
+
+    return ", ".join(visible_names[:-1]) + f" and {visible_names[-1]}"
+
+
+def is_dive_source(hero_name, role_name, lane_options):
+    return hero_name in DIVE_HEROES or role_name == "Assassin" or (role_name == "Fighter" and "Jungler" in lane_options)
+
+
+def is_peel_source(hero_name, role_name, lane_options):
+    return hero_name in PEEL_HEROES or role_name in {"Tank", "Support"} or "Roamer" in lane_options
+
+
+def is_sustain_damage_source(hero_name, role_name, lane_options):
+    return hero_name in SUSTAIN_DAMAGE_HEROES or role_name == "Marksman" or "Gold Lane" in lane_options
+
+
+def is_aoe_control_source(hero_name, role_name):
+    return hero_name in AOE_CONTROL_HEROES or role_name in {"Mage", "Tank", "Support"}
+
+
+def _build_composition_profile(team_df):
+    if team_df.empty:
+        return {
+            "frontline_heroes": [],
+            "backline_heroes": [],
+            "squishy_heroes": [],
+            "dive_heroes": [],
+            "melee_pressure_heroes": [],
+            "scaling_heroes": [],
+            "magic_heroes": [],
+            "lane_heroes": {lane_name: [] for lane_name in REQUIRED_LANES},
+        }
+
+    profile = {
+        "frontline_heroes": [],
+        "backline_heroes": [],
+        "squishy_heroes": [],
+        "dive_heroes": [],
+        "melee_pressure_heroes": [],
+        "scaling_heroes": [],
+        "magic_heroes": [],
+        "lane_heroes": {lane_name: [] for lane_name in REQUIRED_LANES},
+    }
+
+    for _, row in team_df.iterrows():
+        hero_name = row["Hero"]
+        role_name = row["Role"]
+        lane_options = _lane_options(row)
+
+        if role_name in FRONTLINE_ROLES:
+            profile["frontline_heroes"].append(hero_name)
+
+        if role_name in BACKLINE_ROLES:
+            profile["backline_heroes"].append(hero_name)
+
+        if role_name in SQUISHY_ROLES:
+            profile["squishy_heroes"].append(hero_name)
+
+        if is_dive_source(hero_name, role_name, lane_options):
+            profile["dive_heroes"].append(hero_name)
+
+        if role_name in {"Tank", "Fighter", "Assassin"} or "Roamer" in lane_options or "EXP Lane" in lane_options:
+            profile["melee_pressure_heroes"].append(hero_name)
+
+        if is_scaling_source(hero_name, role_name, lane_options):
+            profile["scaling_heroes"].append(hero_name)
+
+        if is_magic_source(hero_name, role_name):
+            profile["magic_heroes"].append(hero_name)
+
+        for lane_name in lane_options:
+            if lane_name in profile["lane_heroes"]:
+                profile["lane_heroes"][lane_name].append(hero_name)
+
+    return profile
 
 
 def find_best_lane_assignment(team_df):
@@ -144,18 +309,132 @@ def _format_score_drivers(score_drivers):
     ]
 
 
+def _sentence_case(text):
+    if not text:
+        return text
+    return text[0].upper() + text[1:]
+
+
+def _lower_sentence_start(text):
+    if not text:
+        return text
+    return text[0].lower() + text[1:]
+
+
+def _is_enemy_specific_reason(reason_text):
+    lowered_reason = reason_text.lower()
+    return "enemy" in lowered_reason or " backline" in lowered_reason or "frontline " in lowered_reason
+
+
+def _prioritize_reasons(reasons):
+    prioritized = []
+    seen = set()
+    enemy_specific_reason = next((reason for reason in reasons if _is_enemy_specific_reason(reason)), None)
+
+    if enemy_specific_reason:
+        prioritized.append(enemy_specific_reason)
+        seen.add(enemy_specific_reason)
+
+    for reason in reasons:
+        if reason in seen:
+            continue
+        prioritized.append(reason)
+        seen.add(reason)
+
+    return prioritized
+
+
 def _summarize_pick_recommendation(hero_name, reasons, projected_changes):
-    lead_reason = reasons[0] if reasons else "High raw meta power"
+    prioritized_reasons = _prioritize_reasons(reasons)
+    lead_reason = prioritized_reasons[0] if prioritized_reasons else "High raw meta power"
     top_change = projected_changes[0]["detail"] if projected_changes else "Projected team structure stays stable."
-    return f"{hero_name} is recommended because it {lead_reason.lower()}. {top_change}"
+    return f"{hero_name} is recommended because it {_lower_sentence_start(lead_reason)}. {top_change}"
 
 
 def _summarize_ban_recommendation(hero_name, reasons, score_drivers):
-    lead_reason = reasons[0] if reasons else "High contest and power score"
+    prioritized_reasons = _prioritize_reasons(reasons)
+    lead_reason = prioritized_reasons[0] if prioritized_reasons else "High contest and power score"
+    summary_reason = _lower_sentence_start(lead_reason)
+    if summary_reason.startswith("would "):
+        reason_clause = f"because it {summary_reason}"
+    else:
+        reason_clause = f"because of {summary_reason}"
     top_driver = _format_score_drivers(score_drivers)
     if top_driver:
-        return f"{hero_name} is a ban target because of {lead_reason.lower()}. Strongest threat driver: {top_driver[0]['detail']}"
-    return f"{hero_name} is a ban target because of {lead_reason.lower()}."
+        return f"{hero_name} is a ban target {reason_clause}. Strongest threat driver: {top_driver[0]['detail']}"
+    return f"{hero_name} is a ban target {reason_clause}."
+
+
+def _add_enemy_pickup_pressure(score_drivers, reasons, hero_name, role_name, lane_options, enemy_profile):
+    enemy_backline = enemy_profile["backline_heroes"]
+    enemy_frontline = enemy_profile["frontline_heroes"]
+    enemy_dive = enemy_profile["dive_heroes"]
+    enemy_melee = enemy_profile["melee_pressure_heroes"]
+    enemy_magic = enemy_profile["magic_heroes"]
+
+    if len(enemy_backline) >= 2 and is_dive_source(hero_name, role_name, lane_options):
+        target_text = _hero_list_text(enemy_backline)
+        score_drivers["Backline punish"] = 11
+        reasons.append(f"pressures enemy backliners like {target_text}")
+
+    if len(enemy_frontline) >= 2 and is_sustain_damage_source(hero_name, role_name, lane_options):
+        target_text = _hero_list_text(enemy_frontline)
+        score_drivers["Frontline shred"] = 10
+        reasons.append(f"helps burn through enemy frontline {target_text}")
+
+    if len(enemy_dive) >= 2 and is_peel_source(hero_name, role_name, lane_options):
+        target_text = _hero_list_text(enemy_dive)
+        score_drivers["Anti-dive"] = 9
+        reasons.append(f"stabilizes against dive from {target_text}")
+
+    if len(enemy_melee) >= 3 and is_aoe_control_source(hero_name, role_name):
+        target_text = _hero_list_text(enemy_melee)
+        score_drivers["Melee punish"] = 7
+        reasons.append(f"punishes clustered melee from {target_text}")
+
+    if len(enemy_magic) >= 2 and role_name in FRONTLINE_ROLES and ("Roamer" in lane_options or "EXP Lane" in lane_options):
+        target_text = _hero_list_text(enemy_magic)
+        score_drivers["Magic soak"] = 5
+        reasons.append(f"adds a sturdier front line into enemy magic from {target_text}")
+
+
+def _add_enemy_ban_pressure(score_drivers, reasons, hero_name, role_name, lane_options, team_profile, enemy_profile):
+    enemy_frontline = enemy_profile["frontline_heroes"]
+    enemy_backline = enemy_profile["backline_heroes"]
+    enemy_dive = enemy_profile["dive_heroes"]
+    enemy_scaling = enemy_profile["scaling_heroes"]
+    team_backline = team_profile["backline_heroes"]
+    team_frontline = team_profile["frontline_heroes"]
+
+    if enemy_frontline and is_sustain_damage_source(hero_name, role_name, lane_options):
+        target_text = _hero_list_text(enemy_frontline)
+        score_drivers["Enemy comp fit"] = 9
+        reasons.append(f"would slot cleanly behind enemy frontline {target_text}")
+
+    if enemy_dive and (is_dive_source(hero_name, role_name, lane_options) or hero_name in {"Angela", "Mathilda", "Floryn"}):
+        target_text = _hero_list_text(enemy_dive)
+        score_drivers["Dive synergy"] = 8
+        reasons.append(f"would amplify enemy dive from {target_text}")
+
+    if enemy_backline and role_name in FRONTLINE_ROLES and ("Roamer" in lane_options or "EXP Lane" in lane_options):
+        target_text = _hero_list_text(enemy_backline)
+        score_drivers["Comp completion"] = 7
+        reasons.append(f"would round out enemy damage cores like {target_text}")
+
+    if team_backline and is_dive_source(hero_name, role_name, lane_options):
+        target_text = _hero_list_text(team_backline)
+        score_drivers["Backline threat"] = 8
+        reasons.append(f"would threaten your backline {target_text}")
+
+    if team_frontline and is_sustain_damage_source(hero_name, role_name, lane_options):
+        target_text = _hero_list_text(team_frontline)
+        score_drivers["Frontline threat"] = 6
+        reasons.append(f"would pressure your frontline {target_text}")
+
+    if enemy_scaling and is_magic_source(hero_name, role_name):
+        target_text = _hero_list_text(enemy_scaling)
+        score_drivers["Damage diversification"] = 4
+        reasons.append(f"would diversify damage around enemy scaling cores {target_text}")
 
 
 def analyze_team(team_df):
@@ -324,6 +603,7 @@ def analyze_team(team_df):
 def recommend_next_picks(meta_df, team_df, enemy_df=None, limit=5):
     enemy_df = enemy_df if enemy_df is not None else meta_df.iloc[0:0]
     baseline = analyze_team(team_df)
+    enemy_profile = _build_composition_profile(enemy_df)
     locked_heroes = set(team_df["Hero"].tolist()) | set(enemy_df["Hero"].tolist())
     recommendations = []
 
@@ -368,9 +648,12 @@ def recommend_next_picks(meta_df, team_df, enemy_df=None, limit=5):
             score_drivers["Flex value"] = 5
             reasons.append("Can flex between lanes")
 
+        _add_enemy_pickup_pressure(score_drivers, reasons, hero_name, role_name, lane_options, enemy_profile)
+
         if not reasons:
             reasons.append("leans on high raw meta power")
 
+        prioritized_reasons = _prioritize_reasons(reasons)
         recommendation_score = sum(score_drivers.values())
         projected_changes = _build_projected_changes(baseline, projected)
         score_breakdown = _format_score_drivers(score_drivers)
@@ -382,8 +665,8 @@ def recommend_next_picks(meta_df, team_df, enemy_df=None, limit=5):
             "True Power Score": round(float(row["True Power Score"]), 1),
             "Contest Rate (%)": round(float(row["Contest Rate (%)"]), 2),
             "Recommendation Score": round(recommendation_score, 1),
-            "Why": [reason.capitalize() for reason in reasons[:3]],
-            "Summary": _summarize_pick_recommendation(hero_name, reasons, projected_changes),
+            "Why": [_sentence_case(reason) for reason in prioritized_reasons[:3]],
+            "Summary": _summarize_pick_recommendation(hero_name, prioritized_reasons, projected_changes),
             "Score Drivers": score_breakdown[:4],
             "Projected Changes": projected_changes[:4],
         })
@@ -395,6 +678,8 @@ def recommend_next_picks(meta_df, team_df, enemy_df=None, limit=5):
 def recommend_bans(meta_df, team_df, enemy_df=None, limit=5):
     enemy_df = enemy_df if enemy_df is not None else meta_df.iloc[0:0]
     team_analysis = analyze_team(team_df)
+    team_profile = _build_composition_profile(team_df)
+    enemy_profile = _build_composition_profile(enemy_df)
     locked_heroes = set(team_df["Hero"].tolist()) | set(enemy_df["Hero"].tolist())
     recommendations = []
 
@@ -427,9 +712,12 @@ def recommend_bans(meta_df, team_df, enemy_df=None, limit=5):
             score_drivers["Mixed damage threat"] = 4
             reasons.append("adds hard-to-match mixed damage")
 
+        _add_enemy_ban_pressure(score_drivers, reasons, hero_name, role_name, lane_options, team_profile, enemy_profile)
+
         if not reasons:
             reasons.append("leans on high contest and power score")
 
+        prioritized_reasons = _prioritize_reasons(reasons)
         threat_score = sum(score_drivers.values())
         score_breakdown = _format_score_drivers(score_drivers)
 
@@ -440,8 +728,8 @@ def recommend_bans(meta_df, team_df, enemy_df=None, limit=5):
             "True Power Score": round(float(row["True Power Score"]), 1),
             "Contest Rate (%)": round(float(row["Contest Rate (%)"]), 2),
             "Threat Score": round(threat_score, 1),
-            "Why": [reason.capitalize() for reason in reasons[:3]],
-            "Summary": _summarize_ban_recommendation(hero_name, reasons, score_drivers),
+            "Why": [_sentence_case(reason) for reason in prioritized_reasons[:3]],
+            "Summary": _summarize_ban_recommendation(hero_name, prioritized_reasons, score_drivers),
             "Score Drivers": score_breakdown[:4],
             "Projected Changes": [],
         })
