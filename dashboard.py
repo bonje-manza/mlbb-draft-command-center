@@ -39,6 +39,352 @@ st.set_page_config(
 )
 
 
+def inject_app_styles():
+    st.markdown(
+        """
+        <style>
+        :root {
+            --cc-bg: #f4efe4;
+            --cc-panel: #fbf7ef;
+            --cc-panel-strong: #f0e5cf;
+            --cc-ink: #17211f;
+            --cc-muted: #5f6f6a;
+            --cc-accent: #0f766e;
+            --cc-accent-2: #bf5b04;
+            --cc-danger: #9f1239;
+            --cc-border: rgba(23, 33, 31, 0.10);
+            --cc-shadow: 0 18px 40px rgba(23, 33, 31, 0.08);
+        }
+
+        .stApp {
+            background:
+                radial-gradient(circle at top left, rgba(15, 118, 110, 0.16), transparent 34%),
+                radial-gradient(circle at top right, rgba(191, 91, 4, 0.14), transparent 28%),
+                linear-gradient(180deg, #fcfaf5 0%, var(--cc-bg) 58%, #efe7d8 100%);
+            color: var(--cc-ink);
+        }
+
+        .block-container {
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+        }
+
+        .cc-hero {
+            padding: 1.45rem 1.5rem;
+            border-radius: 22px;
+            border: 1px solid var(--cc-border);
+            background: linear-gradient(135deg, rgba(251, 247, 239, 0.92), rgba(240, 229, 207, 0.88));
+            box-shadow: var(--cc-shadow);
+            margin-bottom: 1rem;
+        }
+
+        .cc-hero h1 {
+            margin: 0;
+            font-size: 2.35rem;
+            line-height: 1.02;
+            letter-spacing: -0.03em;
+            color: var(--cc-ink);
+        }
+
+        .cc-hero p {
+            margin: 0.65rem 0 0;
+            max-width: 58rem;
+            color: var(--cc-muted);
+            font-size: 1rem;
+        }
+
+        .cc-strip {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.85rem;
+            margin: 1rem 0 0.35rem;
+        }
+
+        .cc-kpi {
+            background: rgba(255, 255, 255, 0.62);
+            border: 1px solid var(--cc-border);
+            border-radius: 18px;
+            padding: 0.95rem 1rem;
+        }
+
+        .cc-kpi-label {
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--cc-muted);
+        }
+
+        .cc-kpi-value {
+            margin-top: 0.35rem;
+            font-size: 1.55rem;
+            font-weight: 700;
+            line-height: 1;
+            color: var(--cc-ink);
+        }
+
+        .cc-panel {
+            background: rgba(251, 247, 239, 0.9);
+            border: 1px solid var(--cc-border);
+            border-radius: 20px;
+            padding: 1rem;
+            box-shadow: var(--cc-shadow);
+            height: 100%;
+        }
+
+        .cc-panel-title {
+            font-size: 0.78rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--cc-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .cc-panel-heading {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--cc-ink);
+            margin-bottom: 0.35rem;
+        }
+
+        .cc-pick-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 0.7rem;
+            margin-top: 0.85rem;
+        }
+
+        .cc-slot {
+            min-height: 112px;
+            border-radius: 18px;
+            border: 1px solid var(--cc-border);
+            background: rgba(255, 255, 255, 0.65);
+            padding: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .cc-slot-friendly {
+            background: linear-gradient(180deg, rgba(15, 118, 110, 0.12), rgba(255, 255, 255, 0.72));
+        }
+
+        .cc-slot-enemy {
+            background: linear-gradient(180deg, rgba(159, 18, 57, 0.12), rgba(255, 255, 255, 0.72));
+        }
+
+        .cc-slot-index {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--cc-muted);
+        }
+
+        .cc-slot-hero {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--cc-ink);
+            line-height: 1.15;
+            margin-top: 0.55rem;
+        }
+
+        .cc-slot-meta {
+            color: var(--cc-muted);
+            font-size: 0.78rem;
+            line-height: 1.35;
+            margin-top: 0.25rem;
+        }
+
+        .cc-slot-empty {
+            color: var(--cc-muted);
+            font-size: 0.88rem;
+            margin-top: 1rem;
+        }
+
+        .cc-score-list {
+            display: grid;
+            gap: 0.65rem;
+        }
+
+        .cc-score-row {
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--cc-border);
+            padding: 0.8rem 0.9rem;
+        }
+
+        .cc-score-topline {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.45rem;
+        }
+
+        .cc-score-name {
+            font-weight: 700;
+            color: var(--cc-ink);
+        }
+
+        .cc-score-value {
+            color: var(--cc-muted);
+            font-weight: 700;
+        }
+
+        .cc-score-bar {
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(23, 33, 31, 0.08);
+            overflow: hidden;
+        }
+
+        .cc-score-bar > span {
+            display: block;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--cc-accent), #14b8a6);
+        }
+
+        .cc-score-detail {
+            margin-top: 0.5rem;
+            color: var(--cc-muted);
+            font-size: 0.83rem;
+        }
+
+        .cc-lane-stack {
+            display: grid;
+            gap: 0.65rem;
+            margin-top: 0.8rem;
+        }
+
+        .cc-lane-pill {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.7rem 0.85rem;
+            border-radius: 14px;
+            border: 1px solid var(--cc-border);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .cc-lane-name {
+            color: var(--cc-muted);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .cc-lane-hero {
+            font-weight: 700;
+            color: var(--cc-ink);
+            text-align: right;
+        }
+
+        .cc-priority-grid {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .cc-priority-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(240, 229, 207, 0.88));
+            border: 1px solid var(--cc-border);
+            border-radius: 18px;
+            padding: 0.95rem 1rem;
+            box-shadow: var(--cc-shadow);
+        }
+
+        .cc-priority-topline {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .cc-priority-rank {
+            color: var(--cc-muted);
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .cc-priority-hero {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--cc-ink);
+        }
+
+        .cc-priority-role {
+            color: var(--cc-muted);
+            font-size: 0.82rem;
+            margin-top: 0.18rem;
+        }
+
+        .cc-priority-score {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--cc-accent);
+            white-space: nowrap;
+        }
+
+        .cc-priority-meta {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin: 0.65rem 0 0.7rem;
+        }
+
+        .cc-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            border-radius: 999px;
+            padding: 0.28rem 0.55rem;
+            background: rgba(23, 33, 31, 0.06);
+            color: var(--cc-ink);
+            font-size: 0.76rem;
+            font-weight: 600;
+        }
+
+        .cc-priority-why {
+            color: var(--cc-muted);
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+
+        .cc-callout {
+            border-radius: 18px;
+            border: 1px solid var(--cc-border);
+            background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(255, 255, 255, 0.68));
+            padding: 0.9rem 1rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .cc-callout strong {
+            display: block;
+            color: var(--cc-ink);
+            margin-bottom: 0.25rem;
+        }
+
+        @media (max-width: 1100px) {
+            .cc-strip,
+            .cc-pick-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 700px) {
+            .cc-strip,
+            .cc-pick-grid {
+                grid-template-columns: 1fr;
+            }
+            .cc-hero h1 {
+                font-size: 1.8rem;
+            }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 @st.cache_data
 def load_meta_data():
     try:
@@ -130,16 +476,56 @@ def build_selection_df(meta_df, selected_heroes):
     )
 
 
-def render_hero_cards(title, selection_df):
-    st.markdown(f"### {title}")
-    if selection_df.empty:
-        st.caption("No heroes locked yet.")
-        return
+def render_pick_panel(title, selection_df, side_label):
+    slots = []
+    for slot_index in range(5):
+        if slot_index < len(selection_df):
+            row = selection_df.iloc[slot_index]
+            slot_body = (
+                f"<div class='cc-slot cc-slot-{side_label}'>"
+                f"<div class='cc-slot-index'>Slot {slot_index + 1}</div>"
+                f"<div class='cc-slot-hero'>{row['Hero']}</div>"
+                f"<div class='cc-slot-meta'>{row['Role']}<br>{row['Primary Lane']}</div>"
+                f"</div>"
+            )
+        else:
+            slot_body = (
+                f"<div class='cc-slot cc-slot-{side_label}'>"
+                f"<div class='cc-slot-index'>Slot {slot_index + 1}</div>"
+                f"<div class='cc-slot-empty'>Waiting for lock-in</div>"
+                f"</div>"
+            )
+        slots.append(slot_body)
 
-    columns = st.columns(5)
-    for index, (_, row) in enumerate(selection_df.iterrows()):
-        with columns[index % 5]:
-            st.info(f"**{row['Hero']}**\n\n{row['Role']}\n\n{row['Primary Lane']}")
+    st.markdown(
+        (
+            "<div class='cc-panel'>"
+            f"<div class='cc-panel-title'>{side_label.title()} Side</div>"
+            f"<div class='cc-panel-heading'>{title}</div>"
+            f"<div class='cc-pick-grid'>{''.join(slots)}</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+
+def render_hero_selector_panel(title, subtitle, key_prefix, options, max_selections):
+    st.markdown(
+        (
+            "<div class='cc-panel'>"
+            f"<div class='cc-panel-title'>{title}</div>"
+            f"<div class='cc-panel-heading'>{subtitle}</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+    return st.multiselect(
+        label=title,
+        options=options,
+        max_selections=max_selections,
+        label_visibility="collapsed",
+        key=f"{key_prefix}_draft_selector",
+    )
 
 
 def render_issue(issue):
@@ -171,25 +557,154 @@ def format_recommendations(recommendations, score_column):
 
 
 def render_lane_assignment(team_analysis):
-    st.markdown("### Projected Lane Plan")
     lane_assignment = team_analysis["lane_assignment"]
-    if not lane_assignment:
-        st.caption("No clean lane assignment is possible yet.")
-    else:
-        for lane_name in REQUIRED_LANES:
-            assigned_hero = next(
-                (hero_name for hero_name, assigned_lane in lane_assignment.items() if assigned_lane == lane_name),
-                None,
-            )
-            if assigned_hero:
-                st.markdown(f"**{lane_name}:** {assigned_hero}")
-            else:
-                st.markdown(f"**{lane_name}:** Open")
+    lane_rows = []
+    for lane_name in REQUIRED_LANES:
+        assigned_hero = next(
+            (hero_name for hero_name, assigned_lane in lane_assignment.items() if assigned_lane == lane_name),
+            None,
+        )
+        lane_rows.append(
+            "<div class='cc-lane-pill'>"
+            f"<div class='cc-lane-name'>{lane_name}</div>"
+            f"<div class='cc-lane-hero'>{assigned_hero or 'Open'}</div>"
+            "</div>"
+        )
 
-    if team_analysis["missing_lanes"]:
-        st.caption("Open lanes: " + ", ".join(team_analysis["missing_lanes"]))
-    else:
-        st.caption("All five lanes are covered.")
+    footer = (
+        "Open lanes: " + ", ".join(team_analysis["missing_lanes"])
+        if team_analysis["missing_lanes"]
+        else "All five lanes are covered."
+    )
+    st.markdown(
+        (
+            "<div class='cc-panel'>"
+            "<div class='cc-panel-title'>Lane Plan</div>"
+            "<div class='cc-panel-heading'>Projected Assignment</div>"
+            f"<div class='cc-lane-stack'>{''.join(lane_rows)}</div>"
+            f"<div class='cc-score-detail'>{footer}</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+
+def render_header_strip(meta_df):
+    s_tier_count = int(meta_df[meta_df["Meta Tier"] == "S-Tier (Absolute Meta / Must Ban)"].shape[0])
+    hottest = meta_df.nlargest(1, "Contest Rate (%)").iloc[0]
+    st.markdown(
+        (
+            "<div class='cc-hero'>"
+            "<div class='cc-panel-title'>Live Draft Console</div>"
+            "<h1>Draft faster. Scan less. Lock better.</h1>"
+            "<p>The command board now leads with the next decision: your current structure, your best follow-up picks, and the bans most likely to punish a weak draft.</p>"
+            "<div class='cc-strip'>"
+            f"<div class='cc-kpi'><div class='cc-kpi-label'>Heroes Tracked</div><div class='cc-kpi-value'>{len(meta_df)}</div></div>"
+            f"<div class='cc-kpi'><div class='cc-kpi-label'>S-Tier Pressure</div><div class='cc-kpi-value'>{s_tier_count}</div></div>"
+            f"<div class='cc-kpi'><div class='cc-kpi-label'>Most Contested</div><div class='cc-kpi-value'>{hottest['Hero']}</div></div>"
+            f"<div class='cc-kpi'><div class='cc-kpi-label'>Contest Rate</div><div class='cc-kpi-value'>{hottest['Contest Rate (%)']:.2f}%</div></div>"
+            "</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+
+def render_score_cards(team_analysis, draft_size):
+    strip_items = [
+        ("Draft Score", f"{team_analysis['team_score']}/100"),
+        ("Average Power", f"{team_analysis['average_power']:.1f}"),
+        ("Average Contest", f"{team_analysis['average_contest']:.2f}%"),
+        ("Draft Progress", f"{draft_size}/5"),
+    ]
+    markup = "".join(
+        f"<div class='cc-kpi'><div class='cc-kpi-label'>{label}</div><div class='cc-kpi-value'>{value}</div></div>"
+        for label, value in strip_items
+    )
+    st.markdown(f"<div class='cc-strip'>{markup}</div>", unsafe_allow_html=True)
+    st.caption(team_analysis["summary"])
+
+
+def render_structure_scores(team_analysis):
+    rows = []
+    for category in team_analysis["categories"]:
+        rows.append(
+            "<div class='cc-score-row'>"
+            "<div class='cc-score-topline'>"
+            f"<div class='cc-score-name'>{category['label']}</div>"
+            f"<div class='cc-score-value'>{category['score']}/100</div>"
+            "</div>"
+            f"<div class='cc-score-bar'><span style='width: {category['score']}%'></span></div>"
+            f"<div class='cc-score-detail'>{category['detail']}</div>"
+            "</div>"
+        )
+
+    st.markdown(
+        (
+            "<div class='cc-panel'>"
+            "<div class='cc-panel-title'>Structure Scan</div>"
+            "<div class='cc-panel-heading'>What the comp looks like right now</div>"
+            f"<div class='cc-score-list'>{''.join(rows)}</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+
+def render_priority_cards(title, subtitle, recommendations, score_column, accent_text):
+    st.markdown(
+        (
+            "<div class='cc-panel'>"
+            f"<div class='cc-panel-title'>{title}</div>"
+            f"<div class='cc-panel-heading'>{subtitle}</div>"
+            f"<div class='cc-score-detail'>{accent_text}</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+    if not recommendations:
+        st.info("No recommendations available for the current draft state.")
+        return
+
+    card_markup = []
+    for index, recommendation in enumerate(recommendations[:3], start=1):
+        card_markup.append(
+            "<div class='cc-priority-card'>"
+            "<div class='cc-priority-topline'>"
+            f"<div><div class='cc-priority-rank'>Priority {index}</div><div class='cc-priority-hero'>{recommendation['Hero']}</div><div class='cc-priority-role'>{recommendation['Role']}</div></div>"
+            f"<div class='cc-priority-score'>{recommendation[score_column]:.1f}</div>"
+            "</div>"
+            "<div class='cc-priority-meta'>"
+            f"<span class='cc-chip'>{recommendation['Primary Lane']}</span>"
+            f"<span class='cc-chip'>Power {recommendation['True Power Score']:.1f}</span>"
+            f"<span class='cc-chip'>Contest {recommendation['Contest Rate (%)']:.2f}%</span>"
+            "</div>"
+            f"<div class='cc-priority-why'>{'; '.join(recommendation['Why'])}</div>"
+            "</div>"
+        )
+
+    st.markdown(f"<div class='cc-priority-grid'>{''.join(card_markup)}</div>", unsafe_allow_html=True)
+
+
+def render_quick_calls(team_analysis, next_pick_recommendations, ban_recommendations):
+    priority_pick = next_pick_recommendations[0]["Hero"] if next_pick_recommendations else "No pick available"
+    priority_ban = ban_recommendations[0]["Hero"] if ban_recommendations else "No ban target available"
+    open_lanes = ", ".join(team_analysis["missing_lanes"]) if team_analysis["missing_lanes"] else "No open lanes"
+
+    st.markdown(
+        (
+            "<div class='cc-callout'>"
+            f"<strong>Pick now: {priority_pick}</strong>"
+            f"Best immediate value based on your current structural gaps and meta power. Open lanes: {open_lanes}."
+            "</div>"
+            "<div class='cc-callout'>"
+            f"<strong>Ban now: {priority_ban}</strong>"
+            "Highest-pressure removal based on meta threat, flexibility, and how exposed your current draft is."
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
 
 
 def handle_admin_actions(hero_list, lane_database):
@@ -282,16 +797,13 @@ def color_win_rate(value):
 
 
 meta_df = enrich_meta_data(load_meta_data(), load_role_database(), load_lane_database())
-
-st.title("Mythical Glory+ Drafting Intelligence")
-st.markdown(
-    "Decision support for MLBB drafts: lane coverage, role balance, next-pick recommendations, and ban pressure in one view."
-)
+inject_app_styles()
 
 if meta_df.empty:
     st.stop()
 
 hero_list = meta_df["Hero"].sort_values().tolist()
+render_header_strip(meta_df)
 
 st.sidebar.header("Meta Snapshot")
 st.sidebar.metric("Total Heroes Analyzed", len(meta_df))
@@ -322,12 +834,24 @@ for _, row in meta_df.nlargest(5, "Contest Rate (%)").iterrows():
 
 handle_admin_actions(hero_list, load_lane_database())
 
-st.subheader("Draft Command Center")
+st.markdown("## Draft Command Center")
 draft_col, enemy_col = st.columns(2)
 with draft_col:
-    selected_team = st.multiselect("Your Draft (up to 5 heroes)", options=hero_list, max_selections=5)
+    selected_team = render_hero_selector_panel(
+        "Your Draft",
+        "Lock your five picks in order.",
+        "friendly",
+        hero_list,
+        5,
+    )
 with enemy_col:
-    selected_enemy = st.multiselect("Enemy Draft (up to 5 heroes)", options=hero_list, max_selections=5)
+    selected_enemy = render_hero_selector_panel(
+        "Enemy Draft",
+        "Track the opposing side as picks are revealed.",
+        "enemy",
+        hero_list,
+        5,
+    )
 
 overlap = sorted(set(selected_team).intersection(selected_enemy))
 if overlap:
@@ -339,115 +863,131 @@ enemy_df = build_selection_df(meta_df, selected_enemy)
 
 team_display_col, enemy_display_col = st.columns(2)
 with team_display_col:
-    render_hero_cards("Your Locked Heroes", team_df)
+    render_pick_panel("Your Locked Heroes", team_df, "friendly")
 with enemy_display_col:
-    render_hero_cards("Enemy Locked Heroes", enemy_df)
+    render_pick_panel("Enemy Locked Heroes", enemy_df, "enemy")
 
 if selected_team:
     team_analysis = analyze_team(team_df)
     next_pick_recommendations = recommend_next_picks(meta_df, team_df, enemy_df, limit=5)
     ban_recommendations = recommend_bans(meta_df, team_df, enemy_df, limit=5)
+    render_score_cards(team_analysis, len(selected_team))
 
-    overview_columns = st.columns(4)
-    overview_columns[0].metric("Draft Score", f"{team_analysis['team_score']}/100")
-    overview_columns[1].metric("Average Power", f"{team_analysis['average_power']:.1f}")
-    overview_columns[2].metric("Average Contest", f"{team_analysis['average_contest']:.2f}%")
-    overview_columns[3].metric("Draft Progress", f"{len(selected_team)}/5")
-    st.caption(team_analysis["summary"])
+    command_tab, breakdown_tab, explorer_tab = st.tabs([
+        "Command Board",
+        "Draft Breakdown",
+        "Meta Explorer",
+    ])
 
-    analysis_col, risk_col, lane_col = st.columns([1.1, 1.2, 1.0])
-    with analysis_col:
-        st.markdown("### Structure Scores")
-        for category in team_analysis["categories"]:
-            st.markdown(f"**{category['label']}** ({category['score']}/100)")
-            st.progress(category["score"] / 100)
-            st.caption(category["detail"])
+    with command_tab:
+        quick_col, score_col, lane_col = st.columns([1.1, 1.15, 0.95])
+        with quick_col:
+            render_quick_calls(team_analysis, next_pick_recommendations, ban_recommendations)
+        with score_col:
+            render_structure_scores(team_analysis)
+        with lane_col:
+            render_lane_assignment(team_analysis)
 
-    with risk_col:
-        st.markdown("### Draft Risks")
-        for issue in team_analysis["issues"]:
-            render_issue(issue)
-        if not team_analysis["issues"]:
-            st.success("No structural draft issues detected.")
+        recommendation_col, ban_col = st.columns(2)
+        with recommendation_col:
+            if len(selected_team) >= 5:
+                st.info("Your side is already full. Remove a lock to reopen next-pick recommendations.")
+            else:
+                render_priority_cards(
+                    "Next Pick Priorities",
+                    "The fastest way to close your current draft gaps.",
+                    next_pick_recommendations,
+                    "Recommendation Score",
+                    "Lead with the highest-value pick instead of scanning the full table first.",
+                )
+        with ban_col:
+            render_priority_cards(
+                "Ban Priorities",
+                "The removals most likely to punish your current shape.",
+                ban_recommendations,
+                "Threat Score",
+                "Ban pressure is ranked by meta threat and how badly each hero stresses your draft.",
+            )
 
-    with lane_col:
-        render_lane_assignment(team_analysis)
-
-    recommendation_col, ban_col = st.columns(2)
-    with recommendation_col:
-        st.markdown("### Best Next Picks")
-        if len(selected_team) >= 5:
-            st.info("Your side is already full. Adjust locks to see next-pick suggestions.")
-        else:
+    with breakdown_tab:
+        risk_col, pick_table_col, ban_table_col = st.columns([0.95, 1.15, 1.15])
+        with risk_col:
+            st.markdown("### Draft Risks")
+            for issue in team_analysis["issues"]:
+                render_issue(issue)
+            if not team_analysis["issues"]:
+                st.success("No structural draft issues detected.")
+        with pick_table_col:
+            st.markdown("### Next Pick Queue")
+            if len(selected_team) >= 5:
+                st.info("Your draft is full.")
+            else:
+                st.dataframe(
+                    format_recommendations(next_pick_recommendations, "Recommendation Score"),
+                    width="stretch",
+                    hide_index=True,
+                )
+        with ban_table_col:
+            st.markdown("### Ban Queue")
             st.dataframe(
-                format_recommendations(next_pick_recommendations, "Recommendation Score"),
-                use_container_width=True,
+                format_recommendations(ban_recommendations, "Threat Score"),
+                width="stretch",
                 hide_index=True,
             )
 
-    with ban_col:
-        st.markdown("### Recommended Bans")
-        st.dataframe(
-            format_recommendations(ban_recommendations, "Threat Score"),
-            use_container_width=True,
-            hide_index=True,
-        )
+    with explorer_tab:
+        filtered_df = meta_df.copy()
+        if selected_role != "All Roles":
+            filtered_df = filtered_df[filtered_df["Role"] == selected_role]
+        if selected_lane != "All Lanes":
+            filtered_df = filtered_df[filtered_df["All Lanes"].apply(lambda lane_names: selected_lane in lane_names)]
+        if search_query:
+            filtered_df = filtered_df[filtered_df["Hero"].str.contains(search_query, case=False, na=False)]
+
+        if filtered_df.empty:
+            st.info("No heroes match the active filters.")
+        else:
+            explorer_columns = [
+                "True Overall Rank",
+                "Hero",
+                "Role",
+                "Primary Lane",
+                "Secondary Lane",
+                "Meta Tier",
+                "True Power Score",
+                "Contest Rate (%)",
+                "Ban Rate",
+                "Pick Rate",
+                "Win Rate",
+            ]
+            explorer_df = filtered_df[explorer_columns].copy()
+            styled_df = explorer_df.style.map(color_win_rate, subset=["Win Rate"]).format(
+                {
+                    "True Power Score": "{:.1f}",
+                    "Contest Rate (%)": "{:.2f}%",
+                    "Ban Rate": "{:.2f}%",
+                    "Pick Rate": "{:.2f}%",
+                    "Win Rate": "{:.2f}%",
+                }
+            )
+
+            st.dataframe(
+                styled_df,
+                width="stretch",
+                hide_index=True,
+                column_config={
+                    "True Overall Rank": st.column_config.NumberColumn("Rank", format="%d"),
+                    "True Power Score": st.column_config.NumberColumn("Power Score", format="%.1f"),
+                    "Contest Rate (%)": st.column_config.ProgressColumn(
+                        "Contest Rate",
+                        min_value=0,
+                        max_value=100,
+                        format="%.2f%%",
+                    ),
+                    "Ban Rate": st.column_config.NumberColumn("Ban Rate", format="%.2f%%"),
+                    "Pick Rate": st.column_config.NumberColumn("Pick Rate", format="%.2f%%"),
+                    "Win Rate": st.column_config.NumberColumn("Win Rate", format="%.2f%%"),
+                },
+            )
 else:
     st.info("Start by locking your own heroes to generate draft analysis, next-pick suggestions, and ban targets.")
-
-st.divider()
-st.subheader("Meta Explorer")
-
-filtered_df = meta_df.copy()
-if selected_role != "All Roles":
-    filtered_df = filtered_df[filtered_df["Role"] == selected_role]
-if selected_lane != "All Lanes":
-    filtered_df = filtered_df[filtered_df["All Lanes"].apply(lambda lane_names: selected_lane in lane_names)]
-if search_query:
-    filtered_df = filtered_df[filtered_df["Hero"].str.contains(search_query, case=False, na=False)]
-
-if filtered_df.empty:
-    st.info("No heroes match the active filters.")
-else:
-    explorer_columns = [
-        "True Overall Rank",
-        "Hero",
-        "Role",
-        "Primary Lane",
-        "Secondary Lane",
-        "Meta Tier",
-        "True Power Score",
-        "Contest Rate (%)",
-        "Ban Rate",
-        "Pick Rate",
-        "Win Rate",
-    ]
-    explorer_df = filtered_df[explorer_columns].copy()
-    styled_df = explorer_df.style.map(color_win_rate, subset=["Win Rate"]).format(
-        {
-            "True Power Score": "{:.1f}",
-            "Contest Rate (%)": "{:.2f}%",
-            "Ban Rate": "{:.2f}%",
-            "Pick Rate": "{:.2f}%",
-            "Win Rate": "{:.2f}%",
-        }
-    )
-
-    st.dataframe(
-        styled_df,
-        use_container_width=True,
-        hide_index=True,
-        column_config={
-            "True Overall Rank": st.column_config.NumberColumn("Rank", format="%d"),
-            "True Power Score": st.column_config.NumberColumn("Power Score", format="%.1f"),
-            "Contest Rate (%)": st.column_config.ProgressColumn(
-                "Contest Rate",
-                min_value=0,
-                max_value=100,
-                format="%.2f%%",
-            ),
-            "Ban Rate": st.column_config.NumberColumn("Ban Rate", format="%.2f%%"),
-            "Pick Rate": st.column_config.NumberColumn("Pick Rate", format="%.2f%%"),
-            "Win Rate": st.column_config.NumberColumn("Win Rate", format="%.2f%%"),
-        },
-    )
