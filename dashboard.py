@@ -867,17 +867,17 @@ with team_display_col:
 with enemy_display_col:
     render_pick_panel("Enemy Locked Heroes", enemy_df, "enemy")
 
+command_tab, breakdown_tab, explorer_tab = st.tabs([
+    "Command Board",
+    "Draft Breakdown",
+    "Meta Explorer",
+])
+
 if selected_team:
     team_analysis = analyze_team(team_df)
     next_pick_recommendations = recommend_next_picks(meta_df, team_df, enemy_df, limit=5)
     ban_recommendations = recommend_bans(meta_df, team_df, enemy_df, limit=5)
     render_score_cards(team_analysis, len(selected_team))
-
-    command_tab, breakdown_tab, explorer_tab = st.tabs([
-        "Command Board",
-        "Draft Breakdown",
-        "Meta Explorer",
-    ])
 
     with command_tab:
         quick_col, score_col, lane_col = st.columns([1.1, 1.15, 0.95])
@@ -934,60 +934,63 @@ if selected_team:
                 width="stretch",
                 hide_index=True,
             )
-
-    with explorer_tab:
-        filtered_df = meta_df.copy()
-        if selected_role != "All Roles":
-            filtered_df = filtered_df[filtered_df["Role"] == selected_role]
-        if selected_lane != "All Lanes":
-            filtered_df = filtered_df[filtered_df["All Lanes"].apply(lambda lane_names: selected_lane in lane_names)]
-        if search_query:
-            filtered_df = filtered_df[filtered_df["Hero"].str.contains(search_query, case=False, na=False)]
-
-        if filtered_df.empty:
-            st.info("No heroes match the active filters.")
-        else:
-            explorer_columns = [
-                "True Overall Rank",
-                "Hero",
-                "Role",
-                "Primary Lane",
-                "Secondary Lane",
-                "Meta Tier",
-                "True Power Score",
-                "Contest Rate (%)",
-                "Ban Rate",
-                "Pick Rate",
-                "Win Rate",
-            ]
-            explorer_df = filtered_df[explorer_columns].copy()
-            styled_df = explorer_df.style.map(color_win_rate, subset=["Win Rate"]).format(
-                {
-                    "True Power Score": "{:.1f}",
-                    "Contest Rate (%)": "{:.2f}%",
-                    "Ban Rate": "{:.2f}%",
-                    "Pick Rate": "{:.2f}%",
-                    "Win Rate": "{:.2f}%",
-                }
-            )
-
-            st.dataframe(
-                styled_df,
-                width="stretch",
-                hide_index=True,
-                column_config={
-                    "True Overall Rank": st.column_config.NumberColumn("Rank", format="%d"),
-                    "True Power Score": st.column_config.NumberColumn("Power Score", format="%.1f"),
-                    "Contest Rate (%)": st.column_config.ProgressColumn(
-                        "Contest Rate",
-                        min_value=0,
-                        max_value=100,
-                        format="%.2f%%",
-                    ),
-                    "Ban Rate": st.column_config.NumberColumn("Ban Rate", format="%.2f%%"),
-                    "Pick Rate": st.column_config.NumberColumn("Pick Rate", format="%.2f%%"),
-                    "Win Rate": st.column_config.NumberColumn("Win Rate", format="%.2f%%"),
-                },
-            )
 else:
-    st.info("Start by locking your own heroes to generate draft analysis, next-pick suggestions, and ban targets.")
+    with command_tab:
+        st.info("Start by locking your own heroes to generate draft analysis, next-pick suggestions, and ban targets.")
+    with breakdown_tab:
+        st.info("Detailed breakdown appears once you have at least one hero locked.")
+
+with explorer_tab:
+    filtered_df = meta_df.copy()
+    if selected_role != "All Roles":
+        filtered_df = filtered_df[filtered_df["Role"] == selected_role]
+    if selected_lane != "All Lanes":
+        filtered_df = filtered_df[filtered_df["All Lanes"].apply(lambda lane_names: selected_lane in lane_names)]
+    if search_query:
+        filtered_df = filtered_df[filtered_df["Hero"].str.contains(search_query, case=False, na=False)]
+
+    if filtered_df.empty:
+        st.info("No heroes match the active filters.")
+    else:
+        explorer_columns = [
+            "True Overall Rank",
+            "Hero",
+            "Role",
+            "Primary Lane",
+            "Secondary Lane",
+            "Meta Tier",
+            "True Power Score",
+            "Contest Rate (%)",
+            "Ban Rate",
+            "Pick Rate",
+            "Win Rate",
+        ]
+        explorer_df = filtered_df[explorer_columns].copy()
+        styled_df = explorer_df.style.map(color_win_rate, subset=["Win Rate"]).format(
+            {
+                "True Power Score": "{:.1f}",
+                "Contest Rate (%)": "{:.2f}%",
+                "Ban Rate": "{:.2f}%",
+                "Pick Rate": "{:.2f}%",
+                "Win Rate": "{:.2f}%",
+            }
+        )
+
+        st.dataframe(
+            styled_df,
+            width="stretch",
+            hide_index=True,
+            column_config={
+                "True Overall Rank": st.column_config.NumberColumn("Rank", format="%d"),
+                "True Power Score": st.column_config.NumberColumn("Power Score", format="%.1f"),
+                "Contest Rate (%)": st.column_config.ProgressColumn(
+                    "Contest Rate",
+                    min_value=0,
+                    max_value=100,
+                    format="%.2f%%",
+                ),
+                "Ban Rate": st.column_config.NumberColumn("Ban Rate", format="%.2f%%"),
+                "Pick Rate": st.column_config.NumberColumn("Pick Rate", format="%.2f%%"),
+                "Win Rate": st.column_config.NumberColumn("Win Rate", format="%.2f%%"),
+            },
+        )
