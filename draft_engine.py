@@ -121,6 +121,77 @@ AOE_CONTROL_HEROES = {
 }
 BACKLINE_ROLES = {"Mage", "Marksman", "Support"}
 SQUISHY_ROLES = {"Assassin", "Mage", "Marksman", "Support"}
+PICK_ORDER_MODES = {
+    "Balanced",
+    "Early Priority",
+    "Mid Draft",
+    "Last Pick",
+}
+
+
+def _normalize_pick_order_mode(pick_order_mode):
+    if pick_order_mode in PICK_ORDER_MODES:
+        return pick_order_mode
+    return "Balanced"
+
+
+def _phase_driver_multiplier(driver_name, pick_order_mode):
+    mode = _normalize_pick_order_mode(pick_order_mode)
+
+    if mode == "Early Priority":
+        multipliers = {
+            "Meta power": 1.2,
+            "Contest leverage": 1.3,
+            "Contest pressure": 1.2,
+            "Tier pressure": 1.25,
+            "Flex value": 1.35,
+            "Flex threat": 1.25,
+            "Lane coverage": 0.75,
+            "Frontline fix": 0.85,
+            "Damage rebalance": 0.85,
+            "Scaling insurance": 0.85,
+            "Projected team upgrade": 0.9,
+        }
+        return multipliers.get(driver_name, 1.0)
+
+    if mode == "Mid Draft":
+        return 1.0
+
+    if mode == "Last Pick":
+        multipliers = {
+            "Meta power": 0.85,
+            "Contest leverage": 0.75,
+            "Contest pressure": 0.85,
+            "Tier pressure": 0.9,
+            "Projected team upgrade": 1.25,
+            "Lane coverage": 1.3,
+            "Frontline fix": 1.35,
+            "Damage rebalance": 1.25,
+            "Scaling insurance": 1.2,
+            "Lane flexibility": 1.25,
+            "Flex value": 0.9,
+            "Enemy comp fit": 1.2,
+            "Dive synergy": 1.25,
+            "Comp completion": 1.15,
+            "Backline threat": 1.25,
+            "Frontline threat": 1.2,
+            "Mixed damage threat": 1.15,
+            "Anti-dive": 1.2,
+            "Melee punish": 1.15,
+            "Magic soak": 1.2,
+            "Backline punish": 1.2,
+            "Frontline shred": 1.2,
+        }
+        return multipliers.get(driver_name, 1.1)
+
+    return 1.0
+
+
+def _apply_pick_order_multipliers(score_drivers, pick_order_mode):
+    adjusted = {}
+    for driver_name, driver_value in score_drivers.items():
+        adjusted[driver_name] = driver_value * _phase_driver_multiplier(driver_name, pick_order_mode)
+    return adjusted
 
 
 def is_magic_source(hero_name, role_name):
@@ -615,16 +686,29 @@ def analyze_team(team_df):
     }
 
 
-def recommend_next_picks(meta_df, team_df, enemy_df=None, banned_heroes=None, limit=5):
+def recommend_next_picks(
+    meta_df,
+    team_df,
+    enemy_df=None,
+    banned_heroes=None,
+    limit=5,
+    pick_order_mode="Balanced",
+    hero_pool=None,
+):
     enemy_df = enemy_df if enemy_df is not None else meta_df.iloc[0:0]
     baseline = analyze_team(team_df)
     enemy_profile = _build_composition_profile(enemy_df)
     locked_heroes = get_unavailable_heroes(team_df, enemy_df, banned_heroes)
+    allowed_heroes = None
+    if hero_pool:
+        allowed_heroes = {str(hero_name).strip() for hero_name in hero_pool if str(hero_name).strip()}
     recommendations = []
 
     for _, row in meta_df.iterrows():
         hero_name = row["Hero"]
         if hero_name in locked_heroes:
+            continue
+        if allowed_heroes is not None and hero_name not in allowed_heroes:
             continue
 
         candidate_df = meta_df[meta_df["Hero"] == hero_name]
@@ -664,6 +748,7 @@ def recommend_next_picks(meta_df, team_df, enemy_df=None, banned_heroes=None, li
             reasons.append("Can flex between lanes")
 
         _add_enemy_pickup_pressure(score_drivers, reasons, hero_name, role_name, lane_options, enemy_profile)
+        score_drivers = _apply_pick_order_multipliers(score_drivers, pick_order_mode)
 
         if not reasons:
             reasons.append("leans on high raw meta power")
@@ -690,7 +775,14 @@ def recommend_next_picks(meta_df, team_df, enemy_df=None, banned_heroes=None, li
     return recommendations[:limit]
 
 
-def recommend_bans(meta_df, team_df, enemy_df=None, banned_heroes=None, limit=5):
+def recommend_bans(
+    meta_df,
+    team_df,
+    enemy_df=None,
+    banned_heroes=None,
+    limit=5,
+    pick_order_mode="Balanced",
+):
     enemy_df = enemy_df if enemy_df is not None else meta_df.iloc[0:0]
     team_analysis = analyze_team(team_df)
     team_profile = _build_composition_profile(team_df)
@@ -728,6 +820,7 @@ def recommend_bans(meta_df, team_df, enemy_df=None, banned_heroes=None, limit=5)
             reasons.append("adds hard-to-match mixed damage")
 
         _add_enemy_ban_pressure(score_drivers, reasons, hero_name, role_name, lane_options, team_profile, enemy_profile)
+        score_drivers = _apply_pick_order_multipliers(score_drivers, pick_order_mode)
 
         if not reasons:
             reasons.append("leans on high contest and power score")

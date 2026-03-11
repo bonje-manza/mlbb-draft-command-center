@@ -152,6 +152,46 @@ class DraftEngineTests(unittest.TestCase):
             any("enemy dive" in reason.lower() for reason in freya_recommendation["Why"])
         )
 
+    def test_recommend_next_picks_respects_hero_pool_lock(self):
+        team_df = self.heroes("Gloo", "Diggie")
+        enemy_df = self.heroes("Claude", "Zhuxin")
+
+        recommendations = recommend_next_picks(
+            self.meta_df,
+            team_df,
+            enemy_df,
+            banned_heroes=[],
+            limit=10,
+            hero_pool=["Freya", "Karrie"],
+        )
+        recommendation_names = {item["Hero"] for item in recommendations}
+
+        self.assertSetEqual(recommendation_names, {"Freya", "Karrie"})
+
+    def test_pick_order_mode_parameter_is_supported_for_picks_and_bans(self):
+        team_df = self.heroes("Gloo", "Diggie")
+        enemy_df = self.heroes("Claude", "Zhuxin")
+
+        pick_recommendations = recommend_next_picks(
+            self.meta_df,
+            team_df,
+            enemy_df,
+            banned_heroes=[],
+            limit=5,
+            pick_order_mode="Last Pick",
+        )
+        ban_recommendations = recommend_bans(
+            self.meta_df,
+            team_df,
+            enemy_df,
+            banned_heroes=[],
+            limit=5,
+            pick_order_mode="Early Priority",
+        )
+
+        self.assertTrue(len(pick_recommendations) > 0)
+        self.assertTrue(len(ban_recommendations) > 0)
+
 
 if __name__ == "__main__":
     unittest.main()

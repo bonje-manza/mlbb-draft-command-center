@@ -11,7 +11,7 @@ from meta_scout import API_ENDPOINT_ENV, REQUIRED_API_TOKEN_ENV, analyze_meta, g
 DATA_FILE = "current_mlbb_meta_api.csv"
 ROLE_FILE = "hero_roles.json"
 LANE_FILE = "hero_lanes.json"
-ADMIN_PASSWORD_ENV = "Glory2026"
+ADMIN_PASSWORD_ENV = "MLBB_ADMIN_PASSWORD"
 REQUIRED_COLUMNS = {
     "True Overall Rank",
     "Hero",
@@ -43,196 +43,338 @@ def inject_app_styles():
     st.markdown(
         """
         <style>
-        :root {
-            --cc-bg: #f4efe4;
-            --cc-panel: #fbf7ef;
-            --cc-panel-strong: #f0e5cf;
-            --cc-ink: #17211f;
-            --cc-muted: #5f6f6a;
-            --cc-accent: #0f766e;
-            --cc-accent-2: #bf5b04;
-            --cc-danger: #9f1239;
-            --cc-border: rgba(23, 33, 31, 0.10);
-            --cc-shadow: 0 18px 40px rgba(23, 33, 31, 0.08);
+            /* ========================================
+               THEME-AWARE COLOR SYSTEM
+               Automatically adapts to light/dark mode
+            ======================================== */
+        
+            :root, [data-theme="light"] {
+                /* Light Mode Colors */
+                --cc-bg-base: #fafaf9;
+                --cc-bg-elevated: #ffffff;
+                --cc-bg-gradient-1: rgba(14, 165, 233, 0.08);
+                --cc-bg-gradient-2: rgba(168, 85, 247, 0.06);
+                --cc-surface: rgba(255, 255, 255, 0.85);
+                --cc-surface-strong: rgba(250, 250, 249, 0.95);
+                --cc-surface-hover: rgba(245, 245, 244, 0.95);
+            
+                --cc-text-primary: #0a0a0a;
+                --cc-text-secondary: #525252;
+                --cc-text-muted: #737373;
+            
+                --cc-border-default: rgba(0, 0, 0, 0.08);
+                --cc-border-strong: rgba(0, 0, 0, 0.12);
+            
+                --cc-accent-primary: #0ea5e9;
+                --cc-accent-secondary: #8b5cf6;
+                --cc-accent-success: #10b981;
+                --cc-accent-warning: #f59e0b;
+                --cc-accent-danger: #ef4444;
+            
+                --cc-friendly: #059669;
+                --cc-friendly-bg: rgba(16, 185, 129, 0.12);
+                --cc-enemy: #dc2626;
+                --cc-enemy-bg: rgba(239, 68, 68, 0.12);
+            
+                --cc-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+                --cc-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10);
+                --cc-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+                --cc-glow: 0 0 20px rgba(14, 165, 233, 0.15);
+
+                --cc-space-xs: 0.5rem;
+                --cc-space-sm: 0.75rem;
+                --cc-space-md: 1rem;
+                --cc-space-lg: 1.25rem;
+                --cc-space-xl: 1.5rem;
+                --cc-space-2xl: 2rem;
+                --cc-top-nav-offset: 3.75rem;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                :root, [data-theme="dark"] {
+                    /* Dark Mode Colors */
+                    --cc-bg-base: #0a0a0a;
+                    --cc-bg-elevated: #171717;
+                    --cc-bg-gradient-1: rgba(14, 165, 233, 0.12);
+                    --cc-bg-gradient-2: rgba(168, 85, 247, 0.10);
+                    --cc-surface: rgba(23, 23, 23, 0.90);
+                    --cc-surface-strong: rgba(38, 38, 38, 0.95);
+                    --cc-surface-hover: rgba(64, 64, 64, 0.95);
+                
+                    --cc-text-primary: #fafafa;
+                    --cc-text-secondary: #d4d4d4;
+                    --cc-text-muted: #a3a3a3;
+                
+                    --cc-border-default: rgba(255, 255, 255, 0.10);
+                    --cc-border-strong: rgba(255, 255, 255, 0.15);
+                
+                    --cc-accent-primary: #38bdf8;
+                    --cc-accent-secondary: #a78bfa;
+                    --cc-accent-success: #34d399;
+                    --cc-accent-warning: #fbbf24;
+                    --cc-accent-danger: #f87171;
+                
+                    --cc-friendly: #10b981;
+                    --cc-friendly-bg: rgba(16, 185, 129, 0.18);
+                    --cc-enemy: #ef4444;
+                    --cc-enemy-bg: rgba(239, 68, 68, 0.18);
+                
+                    --cc-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.30);
+                    --cc-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.40);
+                    --cc-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.50);
+                    --cc-glow: 0 0 30px rgba(56, 189, 248, 0.25);
+                }
         }
 
+            /* ========================================
+               BASE LAYOUT & BACKGROUNDS
+            ======================================== */
+        
         .stApp {
             background:
-                radial-gradient(circle at top left, rgba(15, 118, 110, 0.16), transparent 34%),
-                radial-gradient(circle at top right, rgba(191, 91, 4, 0.14), transparent 28%),
-                linear-gradient(180deg, #fcfaf5 0%, var(--cc-bg) 58%, #efe7d8 100%);
-            color: var(--cc-ink);
+                    radial-gradient(circle at 20% 20%, var(--cc-bg-gradient-1), transparent 50%),
+                    radial-gradient(circle at 80% 80%, var(--cc-bg-gradient-2), transparent 50%),
+                    var(--cc-bg-base);
+                color: var(--cc-text-primary);
+                transition: background 0.3s ease, color 0.2s ease;
         }
 
         .block-container {
-            padding-top: 2rem;
-            padding-bottom: 3rem;
+            padding-top: calc(var(--cc-top-nav-offset) + var(--cc-space-lg));
+            padding-bottom: var(--cc-space-2xl);
+                max-width: 1600px;
         }
 
+            /* ========================================
+               HERO HEADER SECTION
+            ======================================== */
+        
         .cc-hero {
-            padding: 1.45rem 1.5rem;
-            border-radius: 22px;
-            border: 1px solid var(--cc-border);
-            background: linear-gradient(135deg, rgba(251, 247, 239, 0.92), rgba(240, 229, 207, 0.88));
-            box-shadow: var(--cc-shadow);
-            margin-bottom: 1rem;
+            padding: var(--cc-space-2xl) calc(var(--cc-space-2xl) + var(--cc-space-xs));
+                border-radius: 24px;
+                border: 1px solid var(--cc-border-default);
+                background: var(--cc-surface-strong);
+                backdrop-filter: blur(20px);
+                box-shadow: var(--cc-shadow-lg), var(--cc-glow);
+            margin-top: var(--cc-space-md);
+            margin-bottom: var(--cc-space-xl);
+                transition: all 0.3s ease;
         }
 
         .cc-hero h1 {
             margin: 0;
-            font-size: 2.35rem;
-            line-height: 1.02;
-            letter-spacing: -0.03em;
-            color: var(--cc-ink);
+                font-size: 2.75rem;
+                line-height: 1.1;
+                letter-spacing: -0.04em;
+                background: linear-gradient(135deg, var(--cc-accent-primary), var(--cc-accent-secondary));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                font-weight: 800;
         }
 
         .cc-hero p {
-            margin: 0.65rem 0 0;
-            max-width: 58rem;
-            color: var(--cc-muted);
-            font-size: 1rem;
+                margin: 0.75rem 0 0;
+                max-width: 60rem;
+                color: var(--cc-text-secondary);
+                font-size: 1.05rem;
+                line-height: 1.6;
         }
 
+            /* ========================================
+               KPI METRICS STRIP
+            ======================================== */
+        
         .cc-strip {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 0.85rem;
-            margin: 1rem 0 0.35rem;
+                gap: var(--cc-space-lg);
+                margin: var(--cc-space-lg) 0 var(--cc-space-sm);
         }
 
         .cc-kpi {
-            background: rgba(255, 255, 255, 0.62);
-            border: 1px solid var(--cc-border);
-            border-radius: 18px;
-            padding: 0.95rem 1rem;
+                background: var(--cc-surface);
+                backdrop-filter: blur(10px);
+                border: 1px solid var(--cc-border-default);
+                border-radius: 16px;
+                padding: 1.25rem 1.5rem;
+                transition: all 0.2s ease;
+            }
+        
+            .cc-kpi:hover {
+                background: var(--cc-surface-hover);
+                box-shadow: var(--cc-shadow-md);
+                transform: translateY(-2px);
         }
 
         .cc-kpi-label {
-            font-size: 0.74rem;
+                font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--cc-muted);
+                letter-spacing: 0.15em;
+                font-weight: 600;
+                color: var(--cc-text-muted);
         }
 
         .cc-kpi-value {
-            margin-top: 0.35rem;
-            font-size: 1.55rem;
-            font-weight: 700;
-            line-height: 1;
-            color: var(--cc-ink);
+                margin-top: 0.5rem;
+                font-size: 2rem;
+                font-weight: 800;
+                line-height: 1.1;
+                color: var(--cc-text-primary);
         }
 
+            /* ========================================
+               PANEL COMPONENTS
+            ======================================== */
+        
         .cc-panel {
-            background: rgba(251, 247, 239, 0.9);
-            border: 1px solid var(--cc-border);
+                background: var(--cc-surface);
+                backdrop-filter: blur(12px);
+                border: 1px solid var(--cc-border-default);
             border-radius: 20px;
-            padding: 1rem;
-            box-shadow: var(--cc-shadow);
+                padding: var(--cc-space-xl);
+                box-shadow: var(--cc-shadow-md);
             height: 100%;
+                transition: all 0.3s ease;
+            }
+        
+            .cc-panel:hover {
+                border-color: var(--cc-border-strong);
         }
 
         .cc-panel-title {
-            font-size: 0.78rem;
-            letter-spacing: 0.12em;
+                font-size: 0.7rem;
+                letter-spacing: 0.15em;
             text-transform: uppercase;
-            color: var(--cc-muted);
-            margin-bottom: 0.5rem;
+                font-weight: 700;
+                color: var(--cc-accent-primary);
+                margin-bottom: 0.75rem;
         }
 
         .cc-panel-heading {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--cc-ink);
-            margin-bottom: 0.35rem;
+                font-size: 1.35rem;
+                font-weight: 800;
+                color: var(--cc-text-primary);
+                margin-bottom: 0.5rem;
+                line-height: 1.3;
         }
 
+            /* ========================================
+               DRAFT PICK GRID
+            ======================================== */
+        
         .cc-pick-grid {
             display: grid;
             grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 0.7rem;
-            margin-top: 0.85rem;
+                gap: var(--cc-space-md);
+                margin-top: var(--cc-space-md);
         }
 
         .cc-slot {
-            min-height: 112px;
-            border-radius: 18px;
-            border: 1px solid var(--cc-border);
-            background: rgba(255, 255, 255, 0.65);
-            padding: 0.8rem;
+                min-height: 130px;
+                border-radius: 16px;
+                border: 2px solid var(--cc-border-default);
+                background: var(--cc-surface);
+                backdrop-filter: blur(8px);
+                padding: 1rem;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+                transition: all 0.2s ease;
+            }
+        
+            .cc-slot:hover {
+                transform: scale(1.02);
+                box-shadow: var(--cc-shadow-md);
         }
 
         .cc-slot-friendly {
-            background: linear-gradient(180deg, rgba(15, 118, 110, 0.12), rgba(255, 255, 255, 0.72));
+                background: var(--cc-friendly-bg);
+                border-color: var(--cc-friendly);
         }
 
         .cc-slot-enemy {
-            background: linear-gradient(180deg, rgba(159, 18, 57, 0.12), rgba(255, 255, 255, 0.72));
+                background: var(--cc-enemy-bg);
+                border-color: var(--cc-enemy);
         }
 
         .cc-slot-index {
-            font-size: 0.7rem;
+                font-size: 0.65rem;
             text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--cc-muted);
+                letter-spacing: 0.15em;
+                font-weight: 700;
+                color: var(--cc-text-muted);
         }
 
         .cc-slot-hero {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--cc-ink);
-            line-height: 1.15;
-            margin-top: 0.55rem;
+                font-size: 1.1rem;
+                font-weight: 800;
+                color: var(--cc-text-primary);
+                line-height: 1.2;
+                margin-top: 0.6rem;
         }
 
         .cc-slot-meta {
-            color: var(--cc-muted);
-            font-size: 0.78rem;
-            line-height: 1.35;
+                color: var(--cc-text-muted);
+                font-size: 0.8rem;
+                line-height: 1.4;
             margin-top: 0.25rem;
         }
 
         .cc-slot-empty {
-            color: var(--cc-muted);
-            font-size: 0.88rem;
+                color: var(--cc-text-muted);
+                font-size: 0.85rem;
             margin-top: 1rem;
+                font-style: italic;
+                opacity: 0.7;
         }
 
+            /* ========================================
+               SCORE DISPLAY COMPONENTS
+            ======================================== */
+        
         .cc-score-list {
             display: grid;
-            gap: 0.65rem;
+                gap: var(--cc-space-md);
         }
 
         .cc-score-row {
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px solid var(--cc-border);
-            padding: 0.8rem 0.9rem;
+                border-radius: 14px;
+                background: var(--cc-bg-elevated);
+                border: 1px solid var(--cc-border-default);
+                padding: 1rem 1.25rem;
+                transition: all 0.2s ease;
+            }
+        
+            .cc-score-row:hover {
+                background: var(--cc-surface-hover);
+                border-color: var(--cc-border-strong);
         }
 
         .cc-score-topline {
             display: flex;
             justify-content: space-between;
             gap: 1rem;
-            margin-bottom: 0.45rem;
+                margin-bottom: 0.65rem;
+                align-items: center;
         }
 
         .cc-score-name {
-            font-weight: 700;
-            color: var(--cc-ink);
+                font-weight: 800;
+                font-size: 0.95rem;
+                color: var(--cc-text-primary);
         }
 
         .cc-score-value {
-            color: var(--cc-muted);
-            font-weight: 700;
+                color: var(--cc-accent-primary);
+                font-weight: 800;
+                font-size: 1.1rem;
         }
 
         .cc-score-bar {
-            height: 8px;
+                height: 10px;
             border-radius: 999px;
-            background: rgba(23, 33, 31, 0.08);
+                background: var(--cc-border-default);
             overflow: hidden;
         }
 
@@ -240,188 +382,280 @@ def inject_app_styles():
             display: block;
             height: 100%;
             border-radius: 999px;
-            background: linear-gradient(90deg, var(--cc-accent), #14b8a6);
+                background: linear-gradient(90deg, var(--cc-accent-primary), var(--cc-accent-secondary));
+                transition: width 0.5s ease;
         }
 
         .cc-score-detail {
-            margin-top: 0.5rem;
-            color: var(--cc-muted);
-            font-size: 0.83rem;
+                margin-top: 0.65rem;
+                color: var(--cc-text-secondary);
+                font-size: 0.85rem;
+                line-height: 1.5;
         }
 
+            /* ========================================
+               LANE ASSIGNMENT DISPLAY
+            ======================================== */
+        
         .cc-lane-stack {
             display: grid;
-            gap: 0.65rem;
-            margin-top: 0.8rem;
+                gap: var(--cc-space-md);
+                margin-top: var(--cc-space-md);
         }
 
         .cc-lane-pill {
             display: flex;
             justify-content: space-between;
+                align-items: center;
             gap: 1rem;
-            padding: 0.7rem 0.85rem;
+                padding: 0.85rem 1.15rem;
             border-radius: 14px;
-            border: 1px solid var(--cc-border);
-            background: rgba(255, 255, 255, 0.6);
+                border: 1px solid var(--cc-border-default);
+                background: var(--cc-bg-elevated);
+                transition: all 0.2s ease;
+            }
+        
+            .cc-lane-pill:hover {
+                background: var(--cc-surface-hover);
+                border-color: var(--cc-border-strong);
         }
 
         .cc-lane-name {
-            color: var(--cc-muted);
-            font-size: 0.78rem;
+                color: var(--cc-text-muted);
+                font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+                letter-spacing: 0.12em;
+                font-weight: 700;
         }
 
         .cc-lane-hero {
-            font-weight: 700;
-            color: var(--cc-ink);
+                font-weight: 800;
+                font-size: 0.95rem;
+                color: var(--cc-text-primary);
             text-align: right;
         }
 
+            /* ========================================
+               PRIORITY RECOMMENDATION CARDS
+            ======================================== */
+        
         .cc-priority-grid {
             display: grid;
-            gap: 0.8rem;
+                gap: var(--cc-space-md);
         }
 
         .cc-priority-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(240, 229, 207, 0.88));
-            border: 1px solid var(--cc-border);
+                background: var(--cc-surface);
+                backdrop-filter: blur(10px);
+                border: 1px solid var(--cc-border-default);
             border-radius: 18px;
-            padding: 0.95rem 1rem;
-            box-shadow: var(--cc-shadow);
+                padding: 1.25rem 1.5rem;
+                box-shadow: var(--cc-shadow-md);
+                transition: all 0.2s ease;
+            }
+        
+            .cc-priority-card:hover {
+                border-color: var(--cc-accent-primary);
+                box-shadow: var(--cc-shadow-lg), var(--cc-glow);
+                transform: translateY(-3px);
         }
 
         .cc-priority-topline {
             display: flex;
             justify-content: space-between;
             gap: 1rem;
-            align-items: flex-start;
+                align-items: center;
         }
 
         .cc-priority-rank {
-            color: var(--cc-muted);
-            font-size: 0.74rem;
+                color: var(--cc-accent-primary);
+                font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+                letter-spacing: 0.15em;
+                font-weight: 700;
         }
 
         .cc-priority-hero {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--cc-ink);
+                font-size: 1.35rem;
+                font-weight: 800;
+                color: var(--cc-text-primary);
+                margin-top: 0.25rem;
         }
 
         .cc-priority-role {
-            color: var(--cc-muted);
-            font-size: 0.82rem;
-            margin-top: 0.18rem;
+                color: var(--cc-text-secondary);
+                font-size: 0.85rem;
+                margin-top:0.25rem;
         }
 
         .cc-priority-score {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--cc-accent);
+                font-size: 2rem;
+                font-weight: 800;
+                color: var(--cc-accent-primary);
             white-space: nowrap;
+                line-height: 1;
         }
 
         .cc-priority-meta {
             display: flex;
-            gap: 0.5rem;
+                gap: 0.6rem;
             flex-wrap: wrap;
-            margin: 0.65rem 0 0.7rem;
+                margin: 0.85rem 0;
         }
 
         .cc-chip {
             display: inline-flex;
             align-items: center;
-            gap: 0.35rem;
+                gap: 0.4rem;
             border-radius: 999px;
-            padding: 0.28rem 0.55rem;
-            background: rgba(23, 33, 31, 0.06);
-            color: var(--cc-ink);
-            font-size: 0.76rem;
-            font-weight: 600;
+                padding: 0.4rem 0.85rem;
+                background: var(--cc-bg-elevated);
+                border: 1px solid var(--cc-border-default);
+                color: var(--cc-text-secondary);
+                font-size: 0.75rem;
+                font-weight: 700;
+                transition: all 0.2s ease;
+            }
+        
+            .cc-chip:hover {
+                background: var(--cc-surface-hover);
+                border-color: var(--cc-accent-primary);
+                color: var(--cc-accent-primary);
         }
 
         .cc-priority-why {
-            color: var(--cc-muted);
-            font-size: 0.84rem;
-            line-height: 1.45;
+                color: var(--cc-text-secondary);
+                font-size: 0.88rem;
+                line-height: 1.6;
+                margin-bottom: 0.5rem;
         }
 
+            /* ========================================
+               EXPLAINABILITY CARDS
+            ======================================== */
+        
         .cc-explain-stack {
             display: grid;
-            gap: 0.75rem;
-            margin-top: 0.8rem;
+                gap: var(--cc-space-md);
+                margin-top: var(--cc-space-md);
         }
 
         .cc-explain-card {
             border-radius: 16px;
-            border: 1px solid var(--cc-border);
-            background: rgba(255, 255, 255, 0.62);
-            padding: 0.9rem;
+                border: 1px solid var(--cc-border-default);
+                background: var(--cc-bg-elevated);
+                padding: 1.15rem;
+                transition: all 0.2s ease;
+            }
+        
+            .cc-explain-card:hover {
+                border-color: var(--cc-border-strong);
         }
 
         .cc-explain-heading {
-            font-size: 0.74rem;
+                font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--cc-muted);
-            margin-bottom: 0.35rem;
+                letter-spacing: 0.15em;
+                font-weight: 700;
+                color: var(--cc-accent-secondary);
+                margin-bottom: 0.65rem;
         }
 
         .cc-explain-body {
-            color: var(--cc-ink);
-            font-size: 0.88rem;
-            line-height: 1.45;
+                color: var(--cc-text-primary);
+                font-size: 0.9rem;
+                line-height: 1.6;
         }
 
         .cc-explain-list {
             display: grid;
-            gap: 0.45rem;
-            margin-top: 0.6rem;
+                gap: 0.55rem;
+                margin-top: 0.75rem;
         }
 
         .cc-explain-item {
             display: flex;
             justify-content: space-between;
+                align-items: center;
             gap: 1rem;
-            padding: 0.5rem 0.65rem;
+                padding: 0.65rem 0.85rem;
             border-radius: 12px;
-            background: rgba(23, 33, 31, 0.04);
+                background: var(--cc-surface);
+                border: 1px solid var(--cc-border-default);
+                transition: all 0.2s ease;
+            }
+        
+            .cc-explain-item:hover {
+                background: var(--cc-surface-hover);
         }
 
         .cc-explain-item-label {
-            color: var(--cc-ink);
-            font-size: 0.84rem;
+                color: var(--cc-text-primary);
+                font-size: 0.85rem;
+                font-weight: 600;
         }
 
         .cc-explain-item-value {
-            color: var(--cc-muted);
-            font-size: 0.8rem;
-            font-weight: 700;
+                color: var(--cc-accent-primary);
+                font-size: 0.9rem;
+                font-weight: 800;
             white-space: nowrap;
         }
 
+            /* ========================================
+               CALLOUT ALERTS
+            ======================================== */
+        
         .cc-callout {
             border-radius: 18px;
-            border: 1px solid var(--cc-border);
-            background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(255, 255, 255, 0.68));
-            padding: 0.9rem 1rem;
-            margin-bottom: 0.85rem;
+                border: 2px solid var(--cc-accent-primary);
+                background: var(--cc-surface);
+                backdrop-filter: blur(10px);
+                padding: var(--cc-space-md) var(--cc-space-lg);
+                margin-bottom: var(--cc-space-md);
+                box-shadow: var(--cc-shadow-sm);
+                transition: all 0.2s ease;
+            }
+        
+            .cc-callout:hover {
+                box-shadow: var(--cc-shadow-md);
+                transform: translateX(2px);
         }
 
         .cc-callout strong {
             display: block;
-            color: var(--cc-ink);
-            margin-bottom: 0.25rem;
+                color: var(--cc-text-primary);
+                font-size: 1.05rem;
+                margin-bottom: 0.5rem;
+                font-weight: 800;
+            }
+        
+            .cc-callout {
+                color: var(--cc-text-secondary);
+                line-height: 1.6;
         }
 
+            /* ========================================
+               RESPONSIVE DESIGN
+            ======================================== */
+        
         @media (max-width: 1100px) {
             .cc-strip,
             .cc-pick-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
+
+                .block-container {
+                    padding-top: calc(var(--cc-top-nav-offset) + var(--cc-space-md));
+                }
+            
+                .cc-hero {
+                    padding: 1.5rem 2rem;
+                }
+            
+                .cc-hero h1 {
+                    font-size: 2.25rem;
+                }
         }
 
         @media (max-width: 700px) {
@@ -429,10 +663,205 @@ def inject_app_styles():
             .cc-pick-grid {
                 grid-template-columns: 1fr;
             }
+
+                .block-container {
+                    padding-top: calc(var(--cc-top-nav-offset) + var(--cc-space-sm));
+                    padding-bottom: var(--cc-space-xl);
+                }
+            
+                .cc-hero {
+                    padding: 1.25rem 1.5rem;
+                    margin-top: var(--cc-space-sm);
+                }
+            
             .cc-hero h1 {
-                font-size: 1.8rem;
+                    font-size: 1.85rem;
+                }
+            
+                .cc-hero p {
+                    font-size: 0.95rem;
+                }
+            
+                .cc-panel {
+                    padding: 1.25rem;
+                }
+            
+                .cc-priority-card {
+                    padding: 1rem 1.25rem;
             }
+
+                .cc-selector-panel {
+                    min-height: auto;
+                }
+
+                .cc-selector-panel .cc-panel-heading {
+                    min-height: auto;
+                }
         }
+        
+            /* ========================================
+               STREAMLIT COMPONENT OVERRIDES
+            ======================================== */
+        
+            /* Sidebar styling */
+            section[data-testid="stSidebar"] {
+                background: var(--cc-surface) !important;
+                border-right: 1px solid var(--cc-border-default);
+            }
+        
+            section[data-testid="stSidebar"] .block-container {
+                padding-top: 2rem;
+            }
+        
+            /* Tabs */
+            .stTabs [data-baseweb="tab-list"] {
+                gap: 0.5rem;
+            }
+
+            .stTabs {
+                margin-top: var(--cc-space-lg);
+            }
+
+            .stTabs [data-baseweb="tab-panel"] {
+                padding-top: var(--cc-space-md);
+            }
+
+            div[data-testid="stHorizontalBlock"] {
+                gap: var(--cc-space-md);
+            }
+
+            div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+                display: flex;
+                flex-direction: column;
+                gap: var(--cc-space-md);
+            }
+
+            .cc-selector-panel {
+                min-height: 152px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+
+            .cc-selector-panel .cc-panel-heading {
+                min-height: 3.3rem;
+            }
+
+            .cc-selector-panel + div[data-testid="stMultiSelect"] {
+                margin-top: var(--cc-space-sm);
+            }
+
+            .cc-selector-panel + div[data-testid="stMultiSelect"] [data-baseweb="select"] {
+                min-height: 48px;
+            }
+        
+            .stTabs [data-baseweb="tab"] {
+                background: var(--cc-surface);
+                border: 1px solid var(--cc-border-default);
+                border-radius: 12px 12px 0 0;
+                color: var(--cc-text-secondary);
+                font-weight: 600;
+                padding: 0.75rem 1.5rem;
+            }
+        
+            .stTabs [aria-selected="true"] {
+                background: var(--cc-bg-elevated);
+                border-bottom: 2px solid var(--cc-accent-primary);
+                color: var(--cc-accent-primary);
+            }
+        
+            /* Buttons */
+            .stButton > button {
+                background: linear-gradient(135deg, var(--cc-accent-primary), var(--cc-accent-secondary));
+                color: white;
+                border: none;
+                border-radius: 12px;
+                padding: 0.65rem 1.5rem;
+                font-weight: 700;
+                transition: all 0.2s ease;
+            }
+        
+            .stButton > button:hover {
+                transform: translateY(-2px);
+                box-shadow: var(--cc-shadow-md);
+            }
+        
+            /* Multiselect */
+            .stMultiSelect > div > div {
+                background: var(--cc-surface);
+                border-color: var(--cc-border-default);
+                border-radius: 12px;
+            }
+        
+            .stMultiSelect > div > div:focus-within {
+                border-color: var(--cc-accent-primary);
+                box-shadow: 0 0 0 1px var(--cc-accent-primary);
+            }
+        
+            /* Dataframes */
+            .stDataFrame {
+                border-radius: 16px;
+                overflow: hidden;
+            }
+        
+            /* Metrics */
+            [data-testid="stMetricValue"] {
+                color: var(--cc-text-primary);
+                font-weight: 800;
+            }
+        
+            [data-testid="stMetricLabel"] {
+                color: var(--cc-text-muted);
+                font-weight: 600;
+            }
+        
+            /* Text inputs */
+            .stTextInput > div > div > input {
+                background: var(--cc-surface);
+                border-color: var(--cc-border-default);
+                border-radius: 12px;
+                color: var(--cc-text-primary);
+            }
+        
+            .stTextInput > div > div > input:focus {
+                border-color: var(--cc-accent-primary);
+                box-shadow: 0 0 0 1px var(--cc-accent-primary);
+            }
+        
+            /* Selectbox */
+            .stSelectbox > div > div {
+                background: var(--cc-surface);
+                border-color: var(--cc-border-default);
+                border-radius: 12px;
+            }
+        
+            /* ========================================
+               ENHANCED ANIMATIONS
+            ======================================== */
+        
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        
+            .cc-priority-card,
+            .cc-score-row,
+            .cc-panel {
+                animation: fadeIn 0.4s ease-out;
+            }
+        
+            /* Smooth transitions for theme changes */
+            * {
+                transition-property: background-color, border-color, color;
+                transition-duration: 0.2s;
+                transition-timing-function: ease;
+            }
         </style>
         """,
         unsafe_allow_html=True,
@@ -599,7 +1028,7 @@ def render_banned_panel(banned_heroes):
 def render_hero_selector_panel(title, subtitle, key_prefix, options, max_selections):
     st.markdown(
         (
-            "<div class='cc-panel'>"
+            "<div class='cc-panel cc-selector-panel'>"
             f"<div class='cc-panel-title'>{title}</div>"
             f"<div class='cc-panel-heading'>{subtitle}</div>"
             "</div>"
@@ -623,6 +1052,76 @@ def render_issue(issue):
         st.warning(message)
     else:
         st.info(message)
+
+
+def get_next_pick_recommendations(meta_df, team_df, enemy_df, selected_bans, pick_order_mode, effective_hero_pool):
+    try:
+        return recommend_next_picks(
+            meta_df,
+            team_df,
+            enemy_df,
+            selected_bans,
+            limit=5,
+            pick_order_mode=pick_order_mode,
+            hero_pool=effective_hero_pool,
+        )
+    except TypeError:
+        fallback_recommendations = recommend_next_picks(
+            meta_df,
+            team_df,
+            enemy_df,
+            selected_bans,
+            limit=5,
+        )
+        if effective_hero_pool:
+            allowed_heroes = {str(hero_name).strip() for hero_name in effective_hero_pool if str(hero_name).strip()}
+            fallback_recommendations = [
+                recommendation for recommendation in fallback_recommendations if recommendation.get("Hero") in allowed_heroes
+            ]
+        return fallback_recommendations
+
+
+def get_ban_recommendations(meta_df, team_df, enemy_df, selected_bans, pick_order_mode):
+    try:
+        return recommend_bans(
+            meta_df,
+            team_df,
+            enemy_df,
+            selected_bans,
+            limit=5,
+            pick_order_mode=pick_order_mode,
+        )
+    except TypeError:
+        return recommend_bans(
+            meta_df,
+            team_df,
+            enemy_df,
+            selected_bans,
+            limit=5,
+        )
+
+
+def get_draft_hard_blockers(team_df):
+    if team_df.empty:
+        return []
+
+    blockers = []
+    team_analysis = analyze_team(team_df)
+    assigned_lanes = set(team_analysis["lane_assignment"].values())
+    assigned_lane_count = len(assigned_lanes)
+    remaining_slots = max(0, 5 - len(team_df))
+    max_reachable_lanes = assigned_lane_count + remaining_slots
+
+    if max_reachable_lanes < len(REQUIRED_LANES):
+        uncovered_lanes = [lane_name for lane_name in REQUIRED_LANES if lane_name not in assigned_lanes]
+        blockers.append(
+            "Lane assignment is no longer viable for a complete 5-role draft. "
+            f"Current assignable lanes: {assigned_lane_count}/5, picks left: {remaining_slots}, "
+            f"best-case final lanes: {max_reachable_lanes}/5. "
+            f"Still uncovered: {', '.join(uncovered_lanes)}."
+        )
+
+    return blockers
 
 
 def format_recommendations(recommendations, score_column):
@@ -864,6 +1363,61 @@ def render_quick_calls(team_analysis, next_pick_recommendations, ban_recommendat
     )
 
 
+def render_best_next_action(team_analysis, next_pick_recommendations, ban_recommendations):
+    if not next_pick_recommendations and not ban_recommendations:
+        st.info("No immediate action available.")
+        return
+
+    has_critical_issue = any(issue["severity"] == "error" for issue in team_analysis.get("issues", []))
+    should_force_pick = bool(team_analysis.get("missing_lanes")) or team_analysis.get("frontline_count", 0) == 0
+
+    selected_action = "pick"
+    if not next_pick_recommendations:
+        selected_action = "ban"
+    elif not ban_recommendations:
+        selected_action = "pick"
+    elif not has_critical_issue and not should_force_pick:
+        pick_score = next_pick_recommendations[0]["Recommendation Score"]
+        ban_score = ban_recommendations[0]["Threat Score"]
+        if ban_score > (pick_score * 1.1):
+            selected_action = "ban"
+
+    if selected_action == "pick":
+        hero_name = next_pick_recommendations[0]["Hero"]
+        st.markdown(
+            (
+                "<div class='cc-callout'>"
+                f"<strong>Best Next Action: PICK {hero_name}</strong>"
+                "Use this as your immediate lock to maximize current draft value."
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
+        if st.button(f"Apply Pick: {hero_name}", key="apply_best_pick"):
+            locked_team = list(st.session_state.get("friendly_draft_selector", []))
+            if hero_name not in locked_team and len(locked_team) < 5:
+                locked_team.append(hero_name)
+                st.session_state["friendly_draft_selector"] = locked_team
+                st.rerun()
+    else:
+        hero_name = ban_recommendations[0]["Hero"]
+        st.markdown(
+            (
+                "<div class='cc-callout'>"
+                f"<strong>Best Next Action: BAN {hero_name}</strong>"
+                "Remove this threat now to reduce enemy draft pressure."
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
+        if st.button(f"Apply Ban: {hero_name}", key="apply_best_ban"):
+            banned_heroes = list(st.session_state.get("banned_draft_selector", []))
+            if hero_name not in banned_heroes and len(banned_heroes) < 10:
+                banned_heroes.append(hero_name)
+                st.session_state["banned_draft_selector"] = banned_heroes
+                st.rerun()
+
+
 def handle_admin_actions(hero_list, lane_database):
     admin_password = os.getenv(ADMIN_PASSWORD_ENV)
 
@@ -887,14 +1441,14 @@ def handle_admin_actions(hero_list, lane_database):
         st.markdown("### Data Synchronization")
 
         approved_endpoint = os.getenv(API_ENDPOINT_ENV)
-        sync_ready = bool(approved_endpoint and os.getenv(REQUIRED_API_TOKEN_ENV))
+        sync_ready = bool(approved_endpoint)
         if sync_ready:
             st.caption(f"Approved endpoint: {approved_endpoint}")
             if st.button("Sync Approved Data Source"):
                 with st.spinner("Synchronizing with approved source..."):
                     raw_data = get_mlbb_meta_api()
                     if raw_data.empty:
-                        st.error("Synchronization failed. Verify the approved endpoint and API token.")
+                        st.error("Synchronization failed. Check the endpoint or authorization if required.")
                     else:
                         analyzed_meta = analyze_meta(raw_data)
                         analyzed_meta.to_csv(DATA_FILE, index=False)
@@ -903,7 +1457,7 @@ def handle_admin_actions(hero_list, lane_database):
                         st.rerun()
         else:
             st.warning(
-                f"Synchronization is disabled until both {API_ENDPOINT_ENV} and {REQUIRED_API_TOKEN_ENV} are configured."
+                f"Synchronization is disabled until {API_ENDPOINT_ENV} is configured."
             )
 
         st.divider()
@@ -985,6 +1539,22 @@ selected_lane = st.sidebar.selectbox("Filter by Lane", available_lanes)
 search_query = st.sidebar.text_input("Quick Search Hero", placeholder="Search by name...").strip()
 
 st.sidebar.divider()
+st.sidebar.markdown("### Ranked Optimization")
+pick_order_mode = st.sidebar.selectbox(
+    "Pick-Order Mode",
+    ["Balanced", "Early Priority", "Mid Draft", "Last Pick"],
+    index=0,
+)
+restrict_to_hero_pool = st.sidebar.checkbox("Restrict picks to my hero pool", value=False)
+selected_hero_pool = st.sidebar.multiselect(
+    "My Hero Pool",
+    options=hero_list,
+    default=[],
+    max_selections=40,
+)
+effective_hero_pool = selected_hero_pool if (restrict_to_hero_pool and selected_hero_pool) else None
+
+st.sidebar.divider()
 st.sidebar.markdown("### Most Contested Heroes")
 for _, row in meta_df.nlargest(5, "Contest Rate (%)").iterrows():
     st.sidebar.markdown(f"**{row['Hero']}** ({row['Contest Rate (%)']:.2f}%)")
@@ -1030,6 +1600,12 @@ if banned_conflicts:
 
 team_df = build_selection_df(meta_df, selected_team)
 enemy_df = build_selection_df(meta_df, selected_enemy)
+draft_hard_blockers = get_draft_hard_blockers(team_df)
+
+if draft_hard_blockers:
+    st.error("Draft validation blocked: adjust your locked heroes before continuing.")
+    for blocker_message in draft_hard_blockers:
+        st.warning(blocker_message)
 
 team_display_col, enemy_display_col, banned_display_col = st.columns(3)
 with team_display_col:
@@ -1045,16 +1621,34 @@ command_tab, breakdown_tab, explorer_tab = st.tabs([
     "Meta Explorer",
 ])
 
-if selected_team:
+if selected_team and not draft_hard_blockers:
     team_analysis = analyze_team(team_df)
-    next_pick_recommendations = recommend_next_picks(meta_df, team_df, enemy_df, selected_bans, limit=5)
-    ban_recommendations = recommend_bans(meta_df, team_df, enemy_df, selected_bans, limit=5)
+    next_pick_recommendations = get_next_pick_recommendations(
+        meta_df,
+        team_df,
+        enemy_df,
+        selected_bans,
+        pick_order_mode,
+        effective_hero_pool,
+    )
+    ban_recommendations = get_ban_recommendations(
+        meta_df,
+        team_df,
+        enemy_df,
+        selected_bans,
+        pick_order_mode,
+    )
+
+    if restrict_to_hero_pool and not selected_hero_pool:
+        st.warning("Hero pool lock is enabled but your hero pool is empty. Add heroes in the sidebar to unlock pick recommendations.")
+
     render_score_cards(team_analysis, len(selected_team))
 
     with command_tab:
         quick_col, score_col, lane_col = st.columns([1.1, 1.15, 0.95])
         with quick_col:
             render_quick_calls(team_analysis, next_pick_recommendations, ban_recommendations)
+            render_best_next_action(team_analysis, next_pick_recommendations, ban_recommendations)
         with score_col:
             render_structure_scores(team_analysis)
         with lane_col:
@@ -1119,9 +1713,15 @@ if selected_team:
             )
 else:
     with command_tab:
-        st.info("Start by locking your own heroes to generate draft analysis, next-pick suggestions, and ban targets.")
+        if draft_hard_blockers:
+            st.error("Draft is currently blocked by lane viability checks. Update your locked heroes to continue.")
+        else:
+            st.info("Start by locking your own heroes to generate draft analysis, next-pick suggestions, and ban targets.")
     with breakdown_tab:
-        st.info("Detailed breakdown appears once you have at least one hero locked.")
+        if draft_hard_blockers:
+            st.info("Detailed breakdown is disabled until your draft passes hard validation.")
+        else:
+            st.info("Detailed breakdown appears once you have at least one hero locked.")
 
 with explorer_tab:
     filtered_df = meta_df.copy()
