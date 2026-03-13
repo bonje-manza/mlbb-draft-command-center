@@ -7,7 +7,7 @@ import requests
 DEFAULT_ENDPOINT = "https://api.gms.moontontech.com/api/gms/source/2669606/2756568"
 APPROVED_HOSTS = {"api.gms.moontontech.com", "www.mobilelegends.com", "mobilelegends.com"}
 REQUIRED_API_TOKEN_ENV = "MLBB_API_AUTHORIZATION"
-API_ENDPOINT_ENV = "https://api.gms.moontontech.com/api/gms/source/2669606/2756569"
+API_ENDPOINT_ENV = "https://api.gms.moontontech.com/api/gms/source/2669606/2756568"
 
 
 def _resolve_endpoint(endpoint=None):
